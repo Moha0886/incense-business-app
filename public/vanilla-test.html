@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌟 VANILLA HTML TEST</h1>
+    <p>✅ HTML loads correctly</p>
+    <p>✅ CSS styles applied</p>
+    <p id="time"></p>
+    
+    <div style="background: rgba(255,255,255,0.2); padding: 15px; margin: 20px 0; border-radius: 8px;">
+        <h2>Next Steps:</h2>
+        <ol>
+            <li>If you see this page, HTML/CSS works</li>
+            <li>Go back to React app at <a href="http://localhost:5173" style="color: yellow;">http://localhost:5173</a></li>
+            <li>Check browser console for errors (F12)</li>
+        </ol>
+    </div>
+    
+    <script>
+        document.getElementById('time').textContent = '⏰ ' + new Date().toLocaleString();
+        console.log('✅ Vanilla JavaScript working');
+        
+        // Test if we can manipulate DOM
+        setTimeout(() => {
+            document.body.style.background = 'linear-gradient(45deg, #006400, #228B22)';
+        }, 2000);
+    </script>
+</body>
+</html>
