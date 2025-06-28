@@ -878,12 +878,12 @@ function App() {
         }}>
           <h2 style={{ 
             color: theme.textPrimary, 
-            fontSize: '28px',
+            fontSize: isMobile ? '24px' : '28px',
             fontWeight: '700',
             marginBottom: '24px',
             display: 'flex',
             alignItems: 'center',
-            gap: '12px'
+            gap: isMobile ? '8px' : '12px'
           }}>
             {menuItems.find(item => item.id === activeTab)?.icon}
             {menuItems.find(item => item.id === activeTab)?.label}
@@ -1491,8 +1491,114 @@ function App() {
                 border: '1px solid rgba(139, 69, 19, 0.1)'
               }}>
                 <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px' }}>All Customers Overview</h3>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                
+                {isMobile ? (
+                  // Mobile Card Layout
+                  <div style={{ display: 'grid', gap: '16px' }}>
+                    {customers.map(customer => (
+                      <div key={customer.id} style={{
+                        background: theme.cardBg,
+                        borderRadius: '12px',
+                        padding: '16px',
+                        border: '1px solid #f3f4f6',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{ color: theme.textPrimary, margin: '0 0 4px 0', fontSize: '16px', fontWeight: '600' }}>
+                              {customer.name}
+                            </h4>
+                            <div style={{ color: theme.textSecondary, fontSize: '12px' }}>
+                              ID: #{customer.id}
+                            </div>
+                          </div>
+                          <span style={{
+                            background: customer.type === 'Premium' ? '#16a34a' : customer.type === 'Wholesale' ? '#8B4513' : '#6b7280',
+                            color: 'white',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '600'
+                          }}>
+                            {customer.type}
+                          </span>
+                        </div>
+                        
+                        <div style={{ marginBottom: '12px' }}>
+                          <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '4px' }}>Contact Info</div>
+                          <div style={{ color: theme.textPrimary, fontSize: '14px', marginBottom: '2px' }}>
+                            📞 {customer.phone}
+                          </div>
+                          <div style={{ color: theme.textPrimary, fontSize: '14px' }}>
+                            📍 {customer.address}
+                          </div>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                          <div>
+                            <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Orders</div>
+                            <div style={{ color: theme.textPrimary, fontWeight: '600', fontSize: '16px' }}>
+                              {customer.totalOrders}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Total Spent</div>
+                            <div style={{ color: '#16a34a', fontWeight: '600', fontSize: '14px' }}>
+                              ₦{customer.totalSpent?.toLocaleString()}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Discount</div>
+                            <div style={{ color: '#f59e0b', fontWeight: '600', fontSize: '14px' }}>
+                              {customer.discount}%
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={() => {
+                              setEditingCustomer(customer);
+                              setShowAddCustomer(true);
+                            }}
+                            style={{
+                              background: 'none',
+                              border: '1px solid #8B4513',
+                              color: '#8B4513',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              minHeight: '36px' // Touch-friendly
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => deleteCustomer(customer.id)}
+                            style={{
+                              background: 'none',
+                              border: '1px solid #dc2626',
+                              color: '#dc2626',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              cursor: 'pointer',
+                              minHeight: '36px' // Touch-friendly
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // Desktop Table Layout
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
                         <th style={{ textAlign: 'left', padding: '16px', color: theme.textSecondary, fontWeight: '600', fontSize: '14px' }}>Customer Name</th>
@@ -1627,6 +1733,7 @@ function App() {
                     </tbody>
                   </table>
                 </div>
+                )}
                 
                 {/* Customer Summary Statistics */}
                 <div style={{ 
