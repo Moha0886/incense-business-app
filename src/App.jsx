@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import abeerLogo from './assets/logos/abeer-logo.png';
 
 function App() {
   // Mobile state
@@ -731,7 +732,7 @@ function App() {
             ☰
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo.svg" alt="Abeer Logo" style={{ width: '24px', height: '24px' }} />
+            <img src={abeerLogo} alt="Abeer Logo" style={{ width: '24px', height: '24px' }} />
             <h1 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Abeer Business</h1>
           </div>
           <div style={{ width: '36px' }}></div> {/* Spacer for centering */}
@@ -772,7 +773,7 @@ function App() {
           }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <img src="/logo.svg" alt="Abeer Logo" style={{ width: '32px', height: '32px' }} />
+              <img src={abeerLogo} alt="Abeer Logo" style={{ width: '32px', height: '32px' }} />
               <h1 style={{ 
                 margin: 0, 
                 fontSize: '20px', 
