@@ -4,6 +4,47 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [notifications, setNotifications] = useState([]);
   
+  // Settings State
+  const [settings, setSettings] = useState({
+    businessInfo: {
+      name: 'Abeer Incense Business',
+      address: 'Lagos, Nigeria',
+      phone: '+234-xxx-xxx-xxxx',
+      email: 'info@abeerincense.ng',
+      taxId: 'TIN-123456789',
+      currency: 'NGN',
+      currencySymbol: '₦'
+    },
+    preferences: {
+      theme: 'light',
+      language: 'english',
+      dateFormat: 'DD/MM/YYYY',
+      lowStockThreshold: 10,
+      autoBackup: true,
+      notifications: true,
+      soundAlerts: false
+    },
+    inventory: {
+      trackStock: true,
+      allowNegativeStock: false,
+      autoReorderEnabled: false,
+      defaultReorderQuantity: 50
+    },
+    pricing: {
+      defaultMargin: 40,
+      allowDiscounts: true,
+      maxDiscountPercent: 25,
+      roundPrices: true,
+      taxRate: 7.5
+    },
+    sales: {
+      requireCustomerInfo: false,
+      allowPartialPayments: true,
+      defaultPaymentMethod: 'cash',
+      printReceipts: true
+    }
+  });
+
   // Raw Materials
   const [rawMaterials, setRawMaterials] = useState([
     { id: 1, name: 'Wood', quantity: 100, unit: 'pieces', cost: 5000 },
@@ -583,25 +624,22 @@ function App() {
   };
 
   const theme = {
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.98)',
+    background: 'linear-gradient(135deg, #F5E6D3 0%, #E8D7C3 100%)',
+    cardBg: 'rgba(255, 255, 255, 0.95)',
     textPrimary: '#1f2937',
-    textSecondary: '#6b7280',
-    accent: '#d4af37', // Gold accent
-    luxury: '#8b7355', // Rich brown
-    elegant: '#e6ddd4' // Cream
+    textSecondary: '#6b7280'
   };
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '💎', color: theme.accent },
-    { id: 'products', label: 'Fragrances', icon: '🌸', color: theme.accent },
-    { id: 'production', label: 'Blending', icon: '🧪', color: theme.luxury },
-    { id: 'customers', label: 'Clientele', icon: '👑', color: theme.accent },
-    { id: 'sales', label: 'Orders', icon: '💐', color: theme.accent },
-    { id: 'inventory', label: 'Inventory', icon: '🗃️', color: theme.luxury },
-    { id: 'pricing', label: 'Pricing', icon: '💰', color: theme.accent },
-    { id: 'categories', label: 'Collections', icon: '🏺', color: theme.luxury },
-    { id: 'reports', label: 'Analytics', icon: '📈', color: theme.luxury },
+    { id: 'dashboard', label: 'Dashboard', icon: '📊', color: '#8B4513' },
+    { id: 'products', label: 'Products', icon: '🧴', color: '#8B4513' },
+    { id: 'production', label: 'Production', icon: '🏭', color: '#A0522D' },
+    { id: 'customers', label: 'Customers', icon: '👥', color: '#8B4513' },
+    { id: 'sales', label: 'Sales', icon: '🛒', color: '#8B4513' },
+    { id: 'inventory', label: 'Inventory', icon: '📦', color: '#D2691E' },
+    { id: 'pricing', label: 'Pricing', icon: '�', color: '#CD853F' },
+    { id: 'categories', label: 'Categories', icon: '🏷️', color: '#DEB887' },
+    { id: 'reports', label: 'Reports', icon: '📊', color: '#DEB887' },
     { id: 'config', label: 'Settings', icon: '⚙️', color: '#6B7280' }
   ];
 
@@ -1895,7 +1933,725 @@ function App() {
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'products' && activeTab !== 'customers' && activeTab !== 'pricing' && activeTab !== 'categories' && activeTab !== 'sales' && activeTab !== 'inventory' && (
+          {activeTab === 'config' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ color: theme.textPrimary, fontSize: '28px', margin: 0 }}>Settings & Configuration</h2>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('abeer_settings', JSON.stringify(settings));
+                    setNotifications(prev => [...prev, { id: Date.now(), message: 'Settings saved successfully!', type: 'success' }]);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(139, 69, 19, 0.3)'
+                  }}
+                >
+                  💾 Save Settings
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gap: '24px' }}>
+                
+                {/* Business Information */}
+                <div style={{
+                  background: theme.cardBg,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(139, 69, 19, 0.1)'
+                }}>
+                  <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    🏢 Business Information
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Business Name</label>
+                      <input
+                        type="text"
+                        value={settings.businessInfo.name}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          businessInfo: { ...prev.businessInfo, name: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Phone Number</label>
+                      <input
+                        type="text"
+                        value={settings.businessInfo.phone}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          businessInfo: { ...prev.businessInfo, phone: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Email Address</label>
+                      <input
+                        type="email"
+                        value={settings.businessInfo.email}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          businessInfo: { ...prev.businessInfo, email: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Tax ID</label>
+                      <input
+                        type="text"
+                        value={settings.businessInfo.taxId}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          businessInfo: { ...prev.businessInfo, taxId: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '16px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Business Address</label>
+                    <textarea
+                      value={settings.businessInfo.address}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        businessInfo: { ...prev.businessInfo, address: e.target.value }
+                      }))}
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        boxSizing: 'border-box',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* General Preferences */}
+                <div style={{
+                  background: theme.cardBg,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(139, 69, 19, 0.1)'
+                }}>
+                  <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    ⚙️ General Preferences
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Theme</label>
+                      <select
+                        value={settings.preferences.theme}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, theme: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Language</label>
+                      <select
+                        value={settings.preferences.language}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, language: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <option value="english">English</option>
+                        <option value="hausa">Hausa</option>
+                        <option value="yoruba">Yoruba</option>
+                        <option value="igbo">Igbo</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Date Format</label>
+                      <select
+                        value={settings.preferences.dateFormat}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, dateFormat: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Low Stock Threshold</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={settings.preferences.lowStockThreshold}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, lowStockThreshold: parseInt(e.target.value) || 10 }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.preferences.autoBackup}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, autoBackup: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Auto Backup Data</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.preferences.notifications}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, notifications: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Enable Notifications</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.preferences.soundAlerts}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          preferences: { ...prev.preferences, soundAlerts: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Sound Alerts</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Inventory Settings */}
+                <div style={{
+                  background: theme.cardBg,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(139, 69, 19, 0.1)'
+                }}>
+                  <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    📦 Inventory Settings
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.inventory.trackStock}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          inventory: { ...prev.inventory, trackStock: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Track Stock Levels</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.inventory.allowNegativeStock}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          inventory: { ...prev.inventory, allowNegativeStock: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Allow Negative Stock</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.inventory.autoReorderEnabled}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          inventory: { ...prev.inventory, autoReorderEnabled: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Auto Reorder</span>
+                    </label>
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Default Reorder Quantity</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={settings.inventory.defaultReorderQuantity}
+                      onChange={(e) => setSettings(prev => ({
+                        ...prev,
+                        inventory: { ...prev.inventory, defaultReorderQuantity: parseInt(e.target.value) || 50 }
+                      }))}
+                      style={{
+                        width: '200px',
+                        padding: '12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Pricing Settings */}
+                <div style={{
+                  background: theme.cardBg,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(139, 69, 19, 0.1)'
+                }}>
+                  <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    💰 Pricing Settings
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Default Profit Margin (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={settings.pricing.defaultMargin}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          pricing: { ...prev.pricing, defaultMargin: parseInt(e.target.value) || 40 }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Max Discount (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={settings.pricing.maxDiscountPercent}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          pricing: { ...prev.pricing, maxDiscountPercent: parseInt(e.target.value) || 25 }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Tax Rate (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="50"
+                        step="0.1"
+                        value={settings.pricing.taxRate}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          pricing: { ...prev.pricing, taxRate: parseFloat(e.target.value) || 7.5 }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.pricing.allowDiscounts}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          pricing: { ...prev.pricing, allowDiscounts: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Allow Discounts</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.pricing.roundPrices}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          pricing: { ...prev.pricing, roundPrices: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Round Prices</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Sales Settings */}
+                <div style={{
+                  background: theme.cardBg,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(139, 69, 19, 0.1)'
+                }}>
+                  <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    🛒 Sales Settings
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', color: theme.textPrimary, fontWeight: '600' }}>Default Payment Method</label>
+                      <select
+                        value={settings.sales.defaultPaymentMethod}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          sales: { ...prev.sales, defaultPaymentMethod: e.target.value }
+                        }))}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      >
+                        <option value="cash">Cash</option>
+                        <option value="transfer">Bank Transfer</option>
+                        <option value="pos">POS</option>
+                        <option value="mobile">Mobile Money</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.sales.requireCustomerInfo}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          sales: { ...prev.sales, requireCustomerInfo: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Require Customer Info</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.sales.allowPartialPayments}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          sales: { ...prev.sales, allowPartialPayments: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Allow Partial Payments</span>
+                    </label>
+                    
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={settings.sales.printReceipts}
+                        onChange={(e) => setSettings(prev => ({
+                          ...prev,
+                          sales: { ...prev.sales, printReceipts: e.target.checked }
+                        }))}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <span style={{ color: theme.textPrimary, fontWeight: '600' }}>Print Receipts</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Data Management */}
+                <div style={{
+                  background: theme.cardBg,
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(139, 69, 19, 0.1)'
+                }}>
+                  <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    💾 Data Management
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    <button
+                      onClick={() => {
+                        const data = {
+                          products,
+                          customers,
+                          orders,
+                          rawMaterials,
+                          categories,
+                          settings
+                        };
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `abeer-backup-${new Date().toISOString().split('T')[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        setNotifications(prev => [...prev, { id: Date.now(), message: 'Data exported successfully!', type: 'success' }]);
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 20px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)'
+                      }}
+                    >
+                      📤 Export Data
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = (e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                              try {
+                                const data = JSON.parse(e.target.result);
+                                // Here you would restore the data
+                                setNotifications(prev => [...prev, { id: Date.now(), message: 'Data imported successfully!', type: 'success' }]);
+                              } catch (error) {
+                                setNotifications(prev => [...prev, { id: Date.now(), message: 'Import failed: Invalid file format', type: 'error' }]);
+                              }
+                            };
+                            reader.readAsText(file);
+                          }
+                        };
+                        input.click();
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 20px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                      }}
+                    >
+                      📥 Import Data
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                          // Clear localStorage
+                          localStorage.clear();
+                          setNotifications(prev => [...prev, { id: Date.now(), message: 'All data cleared!', type: 'warning' }]);
+                        }
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 20px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
+                      }}
+                    >
+                      🗑️ Clear All Data
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // Reset settings to default
+                        setSettings({
+                          businessInfo: {
+                            name: 'Abeer Incense Business',
+                            address: 'Lagos, Nigeria',
+                            phone: '+234-xxx-xxx-xxxx',
+                            email: 'info@abeerincense.ng',
+                            taxId: 'TIN-123456789',
+                            currency: 'NGN',
+                            currencySymbol: '₦'
+                          },
+                          preferences: {
+                            theme: 'light',
+                            language: 'english',
+                            dateFormat: 'DD/MM/YYYY',
+                            lowStockThreshold: 10,
+                            autoBackup: true,
+                            notifications: true,
+                            soundAlerts: false
+                          },
+                          inventory: {
+                            trackStock: true,
+                            allowNegativeStock: false,
+                            autoReorderEnabled: false,
+                            defaultReorderQuantity: 50
+                          },
+                          pricing: {
+                            defaultMargin: 40,
+                            allowDiscounts: true,
+                            maxDiscountPercent: 25,
+                            roundPrices: true,
+                            taxRate: 7.5
+                          },
+                          sales: {
+                            requireCustomerInfo: false,
+                            allowPartialPayments: true,
+                            defaultPaymentMethod: 'cash',
+                            printReceipts: true
+                          }
+                        });
+                        setNotifications(prev => [...prev, { id: Date.now(), message: 'Settings reset to defaults!', type: 'info' }]);
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 20px',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
+                      }}
+                    >
+                      🔄 Reset Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'products' && activeTab !== 'customers' && activeTab !== 'pricing' && activeTab !== 'categories' && activeTab !== 'sales' && activeTab !== 'inventory' && activeTab !== 'config' && (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <div style={{
                 fontSize: '64px',
