@@ -1,6 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
+  // Mobile state
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Listen for screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) setSidebarOpen(false); // Close sidebar when switching to desktop
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [notifications, setNotifications] = useState([]);
   
@@ -684,19 +700,62 @@ function App() {
         </div>
       ))}
 
+      {/* Mobile Header */}
+      {isMobile && (
+        <header style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '60px',
+          background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          zIndex: 1000,
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+        }}>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontSize: '20px',
+              cursor: 'pointer',
+              padding: '8px'
+            }}
+          >
+            ☰
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ fontSize: '20px' }}>🏪</div>
+            <h1 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Abeer Business</h1>
+          </div>
+          <div style={{ width: '36px' }}></div> {/* Spacer for centering */}
+        </header>
+      )}
+
       {/* Sidebar */}
       <div style={{ 
-        width: '280px', 
+        width: isMobile ? '280px' : '280px',
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(139, 69, 19, 0.1)',
+        position: isMobile ? 'fixed' : 'relative',
+        zIndex: isMobile ? 999 : 'auto',
+        left: isMobile ? (sidebarOpen ? '0' : '-280px') : '0',
+        height: isMobile ? '100vh' : 'auto',
         display: 'flex',
         flexDirection: 'column',
-        position: 'relative'
+        transition: isMobile ? 'left 0.3s ease-in-out' : 'none',
       }}>
         {/* Header */}
         <div style={{ 
-          padding: '32px 24px', 
+          padding: isMobile ? '16px 24px' : '32px 24px',
+          paddingTop: isMobile ? '76px' : '32px', // Account for mobile header
           background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
           color: 'white',
           position: 'relative',
@@ -784,20 +843,38 @@ function App() {
         </div>
       </div>
 
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 998
+          }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main Content */}
       <main style={{ 
         flex: 1, 
-        padding: '40px',
-        overflow: 'auto'
+        padding: isMobile ? '80px 16px 20px 16px' : '40px',
+        overflow: 'auto',
+        minHeight: isMobile ? 'calc(100vh - 60px)' : 'auto',
+        marginTop: isMobile ? '60px' : '0'
       }}>
         <div style={{
           background: theme.cardBg,
-          borderRadius: '20px',
-          padding: '40px',
+          borderRadius: isMobile ? '16px' : '20px',
+          padding: isMobile ? '20px' : '40px',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
-          minHeight: '500px'
+          minHeight: isMobile ? '400px' : '500px'
         }}>
           <h2 style={{ 
             color: theme.textPrimary, 
@@ -818,7 +895,11 @@ function App() {
                 Welcome to your luxury incense business management system.
               </p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', 
+                gap: isMobile ? '16px' : '20px' 
+              }}>
                 <div style={{
                   background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
                   color: 'white',
@@ -949,8 +1030,194 @@ function App() {
                 border: '1px solid rgba(139, 69, 19, 0.1)'
               }}>
                 <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px' }}>All Products Overview</h3>
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                
+                {isMobile ? (
+                  // Mobile Card Layout
+                  <div style={{ display: 'grid', gap: '16px' }}>
+                    {products.map(product => {
+                      const costPrice = calculateProductionCost(product.id);
+                      const sellingPrice = product.price || 0;
+                      const profitMargin = sellingPrice > 0 ? ((sellingPrice - costPrice) / sellingPrice) * 100 : 0;
+                      
+                      return (
+                        <div key={product.id} style={{
+                          background: theme.cardBg,
+                          borderRadius: '12px',
+                          padding: '16px',
+                          border: '1px solid #f3f4f6',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ color: theme.textPrimary, margin: '0 0 4px 0', fontSize: '16px', fontWeight: '600' }}>
+                                {product.name}
+                              </h4>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px' }}>
+                                {product.outputPerBatch} {product.unit}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                  setShowAddProduct(true);
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: '1px solid #8B4513',
+                                  color: '#8B4513',
+                                  padding: '6px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => deleteProduct(product.id)}
+                                style={{
+                                  background: 'none',
+                                  border: '1px solid #dc2626',
+                                  color: '#dc2626',
+                                  padding: '6px 10px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Brand</div>
+                              <span style={{
+                                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                                color: 'white',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600'
+                              }}>
+                                {product.brand}
+                              </span>
+                            </div>
+                            
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Category</div>
+                              <span style={{
+                                background: product.category.includes('Luxury') 
+                                  ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'
+                                  : product.category.includes('Khumra')
+                                  ? 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)'
+                                  : 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)',
+                                color: 'white',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600'
+                              }}>
+                                {product.category}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '4px' }}>Stock Quantity</div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <input
+                                  type="number"
+                                  value={product.quantity}
+                                  onChange={(e) => updateProductQuantity(product.id, parseInt(e.target.value) || 0)}
+                                  style={{
+                                    width: '60px',
+                                    padding: '4px 6px',
+                                    border: '1px solid #d1d5db',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    textAlign: 'center',
+                                    fontWeight: '600',
+                                    color: product.quantity < 10 ? '#dc2626' : product.quantity < 20 ? '#f59e0b' : '#16a34a'
+                                  }}
+                                />
+                                <span style={{ 
+                                  fontSize: '10px', 
+                                  color: theme.textSecondary,
+                                  fontWeight: '500'
+                                }}>
+                                  {product.unit.split(' ')[0]}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '4px' }}>Stock Status</div>
+                              <span style={{
+                                background: product.quantity >= 20 ? '#16a34a' : product.quantity >= 10 ? '#f59e0b' : '#dc2626',
+                                color: 'white',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '11px',
+                                fontWeight: '600'
+                              }}>
+                                {product.quantity >= 20 ? 'In Stock' : product.quantity >= 10 ? 'Low Stock' : product.quantity > 0 ? 'Very Low' : 'Out of Stock'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Cost Price</div>
+                              <div style={{ color: '#dc2626', fontWeight: '600', fontSize: '14px' }}>
+                                ₦{costPrice.toFixed(0)}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Selling Price</div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ color: '#16a34a', fontSize: '10px', fontWeight: '500' }}>₦</span>
+                                <input
+                                  type="number"
+                                  value={sellingPrice}
+                                  onChange={(e) => updateProductPrice(product.id, parseInt(e.target.value) || 0)}
+                                  style={{
+                                    width: '70px',
+                                    padding: '4px 6px',
+                                    border: '1px solid #d1d5db',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    textAlign: 'right',
+                                    fontWeight: '600',
+                                    color: '#16a34a'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <div style={{ color: theme.textSecondary, fontSize: '12px', marginBottom: '2px' }}>Profit Margin</div>
+                              <span style={{
+                                color: profitMargin > 30 ? '#16a34a' : profitMargin > 15 ? '#f59e0b' : '#dc2626',
+                                fontWeight: '600',
+                                fontSize: '14px'
+                              }}>
+                                {profitMargin.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  // Desktop Table Layout
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
                         <th style={{ textAlign: 'left', padding: '16px', color: theme.textSecondary, fontWeight: '600', fontSize: '14px' }}>Product</th>
@@ -1148,6 +1415,7 @@ function App() {
                     </tbody>
                   </table>
                 </div>
+                )}
                 
                 {/* Summary Statistics */}
                 <div style={{ 
@@ -2687,15 +2955,16 @@ function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: isMobile ? '16px' : '0'
         }}>
           <div style={{
             background: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '600px',
-            width: '90%',
-            maxHeight: '80vh',
+            borderRadius: isMobile ? '12px' : '16px',
+            padding: isMobile ? '20px' : '32px',
+            maxWidth: isMobile ? '100%' : '600px',
+            width: isMobile ? '100%' : '90%',
+            maxHeight: isMobile ? '90vh' : '80vh',
             overflow: 'auto'
           }}>
             <h3 style={{ color: theme.textPrimary, marginBottom: '24px' }}>
