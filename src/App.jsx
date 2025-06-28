@@ -731,7 +731,7 @@ function App() {
             ☰
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ fontSize: '20px' }}>🏪</div>
+            <img src="/logo.svg" alt="Abeer Logo" style={{ width: '24px', height: '24px' }} />
             <h1 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Abeer Business</h1>
           </div>
           <div style={{ width: '36px' }}></div> {/* Spacer for centering */}
@@ -771,12 +771,15 @@ function App() {
             pointerEvents: 'none'
           }}></div>
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <h1 style={{ 
-              margin: '0 0 8px 0', 
-              fontSize: '20px', 
-              fontWeight: '700',
-              letterSpacing: '-0.5px'
-            }}>🌟 Abeer</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <img src="/logo.svg" alt="Abeer Logo" style={{ width: '32px', height: '32px' }} />
+              <h1 style={{ 
+                margin: 0, 
+                fontSize: '20px', 
+                fontWeight: '700',
+                letterSpacing: '-0.5px'
+              }}>Abeer</h1>
+            </div>
             <p style={{ 
               margin: 0, 
               opacity: 0.9, 
