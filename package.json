@@ -10,9 +10,17 @@
     "preview": "vite preview",
     "deploy:vercel": "vercel --prod",
     "deploy:netlify": "netlify deploy --prod --dir=dist",
-    "serve": "npm run build && npm run preview"
+    "serve": "npm run build && npm run preview",
+    "ios:build": "npm run build && npx cap copy ios && npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "ios:dev": "npm run ios:build && npm run ios:open",
+    "capacitor:sync": "npx cap sync",
+    "capacitor:copy": "npx cap copy"
   },
   "dependencies": {
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^7.4.0",
+    "@capacitor/ios": "^7.4.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.453.0",
     "react": "^19.1.0",
