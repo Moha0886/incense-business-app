@@ -62,21 +62,21 @@ function App() {
     }
   });
 
-  // Raw Materials
+  // Raw Materials/Ingredients
   const [rawMaterials, setRawMaterials] = useState([
-    { id: 1, name: 'Wood', quantity: 100, unit: 'pieces', cost: 5000 },
-    { id: 2, name: 'Sandal Powder', quantity: 500, unit: 'grams', cost: 12500 },
-    { id: 3, name: 'Farce', quantity: 200, unit: 'grams', cost: 3000 },
-    { id: 4, name: 'Jawee', quantity: 150, unit: 'grams', cost: 8000 },
-    { id: 5, name: 'Sandalia', quantity: 300, unit: 'grams', cost: 6000 },
-    { id: 6, name: 'Sandal Oil', quantity: 100, unit: 'ml', cost: 15000 },
-    { id: 7, name: 'Water Base', quantity: 500, unit: 'ml', cost: 2000 },
-    { id: 8, name: 'Oils', quantity: 200, unit: 'ml', cost: 10000 },
-    { id: 9, name: 'Mask', quantity: 50, unit: 'pieces', cost: 2500 },
-    { id: 10, name: 'Sugar', quantity: 1000, unit: 'grams', cost: 1500 },
-    { id: 11, name: 'Stickers', quantity: 200, unit: 'pieces', cost: 3000 },
-    { id: 12, name: 'Bottles', quantity: 100, unit: 'pieces', cost: 8000 },
-    { id: 13, name: 'Transport Fare', quantity: 1, unit: 'trip', cost: 5000 }
+    { id: 1, name: 'Wood', quantity: 100, unit: 'pieces', costPerUnit: 50, cost: 5000, description: 'High-quality wood base', supplier: 'Wood Co.' },
+    { id: 2, name: 'Sandal Powder', quantity: 500, unit: 'grams', costPerUnit: 25, cost: 12500, description: 'Pure sandal powder', supplier: 'Sandal Suppliers' },
+    { id: 3, name: 'Farce', quantity: 200, unit: 'grams', costPerUnit: 15, cost: 3000, description: 'Aromatic farce compound', supplier: 'Aroma Ltd.' },
+    { id: 4, name: 'Jawee', quantity: 150, unit: 'grams', costPerUnit: 53.33, cost: 8000, description: 'Premium jawee essence', supplier: 'Essence Co.' },
+    { id: 5, name: 'Sandalia', quantity: 300, unit: 'grams', costPerUnit: 20, cost: 6000, description: 'Sandalia extract', supplier: 'Extract Corp.' },
+    { id: 6, name: 'Sandal Oil', quantity: 100, unit: 'ml', costPerUnit: 150, cost: 15000, description: 'Pure sandal oil', supplier: 'Oil Works' },
+    { id: 7, name: 'Water Base', quantity: 500, unit: 'ml', costPerUnit: 4, cost: 2000, description: 'Purified water base', supplier: 'Base Suppliers' },
+    { id: 8, name: 'Oils', quantity: 200, unit: 'ml', costPerUnit: 50, cost: 10000, description: 'Blended essential oils', supplier: 'Oil Depot' },
+    { id: 9, name: 'Mask', quantity: 50, unit: 'pieces', costPerUnit: 50, cost: 2500, description: 'Protective masks', supplier: 'Safety Co.' },
+    { id: 10, name: 'Sugar', quantity: 1000, unit: 'grams', costPerUnit: 1.5, cost: 1500, description: 'Pure sugar', supplier: 'Sugar Mill' },
+    { id: 11, name: 'Stickers', quantity: 200, unit: 'pieces', costPerUnit: 15, cost: 3000, description: 'Product labels', supplier: 'Label Co.' },
+    { id: 12, name: 'Bottles', quantity: 100, unit: 'pieces', costPerUnit: 80, cost: 8000, description: 'Glass bottles', supplier: 'Glass Works' },
+    { id: 13, name: 'Transport Fare', quantity: 1, unit: 'trip', costPerUnit: 5000, cost: 5000, description: 'Transportation cost', supplier: 'Transport Co.' }
   ]);
 
   // Product Categories
@@ -177,6 +177,46 @@ function App() {
     customPrice: ''
   });
 
+  // Production State
+  const [showProductionForm, setShowProductionForm] = useState(false);
+  const [showIngredientForm, setShowIngredientForm] = useState(false);
+  const [productionBatches, setProductionBatches] = useState([
+    {
+      id: 1,
+      productId: 1,
+      batchNumber: 'B001',
+      date: '2024-01-15',
+      jarsProduced: 10,
+      ingredientsUsed: [
+        { ingredientId: 2, quantityUsed: 150 },
+        { ingredientId: 6, quantityUsed: 200 },
+        { ingredientId: 7, quantityUsed: 300 }
+      ],
+      totalIngredientCost: 45000,
+      costPerJar: 4500,
+      notes: 'Premium batch for special order'
+    }
+  ]);
+  const [newProduction, setNewProduction] = useState({
+    productId: '',
+    batchNumber: '',
+    jarsProduced: 1,
+    ingredientsUsed: [],
+    notes: ''
+  });
+  const [currentIngredient, setCurrentIngredient] = useState({
+    ingredientId: '',
+    quantityUsed: 0
+  });
+  const [newIngredient, setNewIngredient] = useState({
+    name: '',
+    unit: '',
+    costPerUnit: 0,
+    quantity: 0,
+    description: '',
+    supplier: ''
+  });
+
   // Form states for dynamic management
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
@@ -204,7 +244,9 @@ function App() {
       outputPerBatch: 10,
       unit: 'bottles (50ml each)',
       price: 15000,
-      quantity: 25
+      quantity: 25,
+      costPrice: 4500,
+      lastProductionDate: '2024-01-15'
     },
     {
       id: 2,
@@ -222,7 +264,9 @@ function App() {
       outputPerBatch: 20,
       unit: 'luxury premium sticks',
       price: 10000,
-      quantity: 50
+      quantity: 50,
+      costPrice: 3200,
+      lastProductionDate: '2024-01-10'
     },
     {
       id: 3,
@@ -239,7 +283,9 @@ function App() {
       outputPerBatch: 15,
       unit: 'standard sticks',
       price: 7000,
-      quantity: 75
+      quantity: 75,
+      costPrice: 2100,
+      lastProductionDate: '2024-01-12'
     },
     {
       id: 4,
@@ -256,7 +302,9 @@ function App() {
       outputPerBatch: 12,
       unit: 'bottles (75ml each)',
       price: 18000,
-      quantity: 30
+      quantity: 30,
+      costPrice: 5400,
+      lastProductionDate: '2024-01-14'
     },
     {
       id: 5,
@@ -274,7 +322,9 @@ function App() {
       outputPerBatch: 25,
       unit: 'royal premium sticks',
       price: 12000,
-      quantity: 40
+      quantity: 40,
+      costPrice: 3800,
+      lastProductionDate: '2024-01-11'
     },
     {
       id: 6,
@@ -291,7 +341,9 @@ function App() {
       outputPerBatch: 18,
       unit: 'fresh scent sticks',
       price: 6500,
-      quantity: 60
+      quantity: 60,
+      costPrice: 1800,
+      lastProductionDate: '2024-01-13'
     }
   ]);
 
@@ -706,6 +758,198 @@ function App() {
 
   const generateInvoicePDF = () => {
     window.print();
+  };
+
+  // Production Functions
+  const addIngredientToProduction = () => {
+    if (!currentIngredient.ingredientId || currentIngredient.quantityUsed <= 0) {
+      addNotification('Please select an ingredient and enter valid quantity', 'error');
+      return;
+    }
+
+    const ingredient = rawMaterials.find(m => m.id === parseInt(currentIngredient.ingredientId));
+    if (!ingredient) {
+      addNotification('Ingredient not found', 'error');
+      return;
+    }
+
+    if (ingredient.quantity < currentIngredient.quantityUsed) {
+      addNotification(`Insufficient stock! Available: ${ingredient.quantity} ${ingredient.unit}, Requested: ${currentIngredient.quantityUsed} ${ingredient.unit}`, 'error');
+      return;
+    }
+
+    const newIngredientUsed = {
+      ingredientId: parseInt(currentIngredient.ingredientId),
+      ingredientName: ingredient.name,
+      quantityUsed: parseFloat(currentIngredient.quantityUsed),
+      unit: ingredient.unit,
+      costPerUnit: ingredient.costPerUnit,
+      totalCost: parseFloat(currentIngredient.quantityUsed) * ingredient.costPerUnit
+    };
+
+    setNewProduction(prev => ({
+      ...prev,
+      ingredientsUsed: [...prev.ingredientsUsed, newIngredientUsed]
+    }));
+
+    setCurrentIngredient({
+      ingredientId: '',
+      quantityUsed: 0
+    });
+  };
+
+  const removeIngredientFromProduction = (index) => {
+    setNewProduction(prev => ({
+      ...prev,
+      ingredientsUsed: prev.ingredientsUsed.filter((_, i) => i !== index)
+    }));
+  };
+
+  const calculateTotalIngredientCost = () => {
+    return newProduction.ingredientsUsed.reduce((sum, ingredient) => sum + ingredient.totalCost, 0);
+  };
+
+  const calculateCostPerJar = () => {
+    const totalCost = calculateTotalIngredientCost();
+    const jars = parseInt(newProduction.jarsProduced) || 1;
+    return totalCost / jars;
+  };
+
+  const submitProduction = () => {
+    if (!newProduction.productId) {
+      addNotification('Please select a product', 'error');
+      return;
+    }
+
+    if (newProduction.ingredientsUsed.length === 0) {
+      addNotification('Please add at least one ingredient', 'error');
+      return;
+    }
+
+    if (!newProduction.jarsProduced || newProduction.jarsProduced <= 0) {
+      addNotification('Please enter a valid number of jars produced', 'error');
+      return;
+    }
+
+    // Generate batch number if not provided
+    const batchNumber = newProduction.batchNumber || `B${String(productionBatches.length + 1).padStart(3, '0')}`;
+
+    const batch = {
+      id: Date.now(),
+      productId: parseInt(newProduction.productId),
+      batchNumber,
+      date: new Date().toISOString().split('T')[0],
+      jarsProduced: parseInt(newProduction.jarsProduced),
+      ingredientsUsed: newProduction.ingredientsUsed.map(ing => ({
+        ingredientId: ing.ingredientId,
+        quantityUsed: ing.quantityUsed
+      })),
+      totalIngredientCost: calculateTotalIngredientCost(),
+      costPerJar: calculateCostPerJar(),
+      notes: newProduction.notes
+    };
+
+    setProductionBatches(prev => [...prev, batch]);
+
+    // Update ingredient quantities (decrease inventory)
+    newProduction.ingredientsUsed.forEach(ingredient => {
+      setRawMaterials(prev => prev.map(material => 
+        material.id === ingredient.ingredientId 
+          ? { 
+              ...material, 
+              quantity: Math.max(0, material.quantity - ingredient.quantityUsed),
+              cost: Math.max(0, material.quantity - ingredient.quantityUsed) * material.costPerUnit
+            }
+          : material
+      ));
+    });
+
+    // Update product quantity (increase inventory) and cost price
+    const product = products.find(p => p.id === parseInt(newProduction.productId));
+    if (product) {
+      setProducts(prev => prev.map(p => 
+        p.id === parseInt(newProduction.productId) 
+          ? { 
+              ...p, 
+              quantity: p.quantity + parseInt(newProduction.jarsProduced),
+              costPrice: calculateCostPerJar(),
+              lastProductionDate: new Date().toISOString().split('T')[0]
+            }
+          : p
+      ));
+    }
+
+    // Reset form
+    setNewProduction({
+      productId: '',
+      batchNumber: '',
+      jarsProduced: 1,
+      ingredientsUsed: [],
+      notes: ''
+    });
+    setCurrentIngredient({
+      ingredientId: '',
+      quantityUsed: 0
+    });
+    setShowProductionForm(false);
+
+    addNotification(`Production batch ${batchNumber} recorded successfully! Cost per jar: ₦${calculateCostPerJar().toLocaleString()}`, 'success');
+  };
+
+  const addNewIngredient = () => {
+    if (!newIngredient.name || !newIngredient.unit || newIngredient.costPerUnit <= 0) {
+      addNotification('Please fill in all required fields', 'error');
+      return;
+    }
+
+    const ingredient = {
+      id: Date.now(),
+      name: newIngredient.name,
+      unit: newIngredient.unit,
+      costPerUnit: parseFloat(newIngredient.costPerUnit),
+      quantity: parseFloat(newIngredient.quantity) || 0,
+      cost: (parseFloat(newIngredient.quantity) || 0) * parseFloat(newIngredient.costPerUnit),
+      description: newIngredient.description,
+      supplier: newIngredient.supplier
+    };
+
+    setRawMaterials(prev => [...prev, ingredient]);
+
+    setNewIngredient({
+      name: '',
+      unit: '',
+      costPerUnit: 0,
+      quantity: 0,
+      description: '',
+      supplier: ''
+    });
+    setShowIngredientForm(false);
+
+    addNotification('Ingredient added successfully!', 'success');
+  };
+
+  const updateIngredientQuantity = (ingredientId, newQuantity) => {
+    setRawMaterials(prev => prev.map(material => 
+      material.id === ingredientId 
+        ? { 
+            ...material, 
+            quantity: Math.max(0, newQuantity),
+            cost: Math.max(0, newQuantity) * material.costPerUnit
+          }
+        : material
+    ));
+  };
+
+  const updateIngredientCostPerUnit = (ingredientId, newCostPerUnit) => {
+    setRawMaterials(prev => prev.map(material => 
+      material.id === ingredientId 
+        ? { 
+            ...material, 
+            costPerUnit: Math.max(0, newCostPerUnit),
+            cost: material.quantity * Math.max(0, newCostPerUnit)
+          }
+        : material
+    ));
   };
 
   const theme = {
@@ -2256,6 +2500,261 @@ function App() {
                             </tr>
                           );
                         })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'production' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ color: theme.textPrimary, fontSize: '28px', margin: 0 }}>Production Management</h2>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => setShowIngredientForm(true)}
+                    style={{
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)'
+                    }}
+                  >
+                    ➕ Add Ingredient
+                  </button>
+                  <button
+                    onClick={() => setShowProductionForm(true)}
+                    style={{
+                      background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(139, 69, 19, 0.3)'
+                    }}
+                  >
+                    🏭 New Production
+                  </button>
+                </div>
+              </div>
+
+              {/* Production Statistics */}
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                  <div style={{
+                    background: theme.cardBg,
+                    borderRadius: '12px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏭</div>
+                    <div style={{ color: theme.textSecondary, fontSize: '14px' }}>Total Batches</div>
+                    <div style={{ color: theme.textPrimary, fontSize: '24px', fontWeight: '600' }}>{productionBatches.length}</div>
+                  </div>
+                  <div style={{
+                    background: theme.cardBg,
+                    borderRadius: '12px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🫙</div>
+                    <div style={{ color: theme.textSecondary, fontSize: '14px' }}>Jars Produced</div>
+                    <div style={{ color: '#16a34a', fontSize: '24px', fontWeight: '600' }}>
+                      {productionBatches.reduce((sum, batch) => sum + batch.jarsProduced, 0)}
+                    </div>
+                  </div>
+                  <div style={{
+                    background: theme.cardBg,
+                    borderRadius: '12px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>💰</div>
+                    <div style={{ color: theme.textSecondary, fontSize: '14px' }}>Total Production Cost</div>
+                    <div style={{ color: '#8B4513', fontSize: '24px', fontWeight: '600' }}>
+                      ₦{productionBatches.reduce((sum, batch) => sum + batch.totalIngredientCost, 0).toLocaleString()}
+                    </div>
+                  </div>
+                  <div style={{
+                    background: theme.cardBg,
+                    borderRadius: '12px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>📊</div>
+                    <div style={{ color: theme.textSecondary, fontSize: '14px' }}>Avg Cost Per Jar</div>
+                    <div style={{ color: '#7c3aed', fontSize: '24px', fontWeight: '600' }}>
+                      ₦{productionBatches.length > 0 ? 
+                        (productionBatches.reduce((sum, batch) => sum + batch.totalIngredientCost, 0) / 
+                         productionBatches.reduce((sum, batch) => sum + batch.jarsProduced, 0)).toLocaleString()
+                        : '0'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Production Batches */}
+              <div style={{
+                background: theme.cardBg,
+                borderRadius: '16px',
+                padding: '24px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                marginBottom: '24px'
+              }}>
+                <h3 style={{ color: theme.textPrimary, marginBottom: '20px' }}>Recent Production Batches</h3>
+                {productionBatches.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: theme.textSecondary }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏭</div>
+                    <h3 style={{ color: theme.textPrimary, marginBottom: '8px' }}>No production batches yet</h3>
+                    <p>Start producing by clicking "New Production" above.</p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+                          <th style={{ textAlign: 'left', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Batch #</th>
+                          <th style={{ textAlign: 'left', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Product</th>
+                          <th style={{ textAlign: 'left', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Date</th>
+                          <th style={{ textAlign: 'center', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Jars</th>
+                          <th style={{ textAlign: 'right', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Total Cost</th>
+                          <th style={{ textAlign: 'right', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Cost/Jar</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {productionBatches.slice().reverse().map(batch => {
+                          const product = products.find(p => p.id === batch.productId);
+                          return (
+                            <tr key={batch.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                              <td style={{ padding: '12px', color: theme.textPrimary, fontWeight: '600' }}>{batch.batchNumber}</td>
+                              <td style={{ padding: '12px', color: theme.textPrimary }}>
+                                {product?.name || `Product ID: ${batch.productId}`}
+                              </td>
+                              <td style={{ padding: '12px', color: theme.textSecondary }}>{batch.date}</td>
+                              <td style={{ padding: '12px', textAlign: 'center', color: theme.textPrimary, fontWeight: '600' }}>
+                                {batch.jarsProduced}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', color: '#8B4513', fontWeight: '600' }}>
+                                ₦{batch.totalIngredientCost.toLocaleString()}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', color: '#7c3aed', fontWeight: '600' }}>
+                                ₦{batch.costPerJar.toLocaleString()}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Ingredients Management */}
+              <div style={{
+                background: theme.cardBg,
+                borderRadius: '16px',
+                padding: '24px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+              }}>
+                <h3 style={{ color: theme.textPrimary, marginBottom: '20px' }}>Ingredients Inventory</h3>
+                {rawMaterials.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: theme.textSecondary }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧪</div>
+                    <h3 style={{ color: theme.textPrimary, marginBottom: '8px' }}>No ingredients yet</h3>
+                    <p>Add ingredients by clicking "Add Ingredient" above.</p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #f3f4f6' }}>
+                          <th style={{ textAlign: 'left', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Ingredient</th>
+                          <th style={{ textAlign: 'center', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Stock</th>
+                          <th style={{ textAlign: 'center', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Unit</th>
+                          <th style={{ textAlign: 'right', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Cost/Unit</th>
+                          <th style={{ textAlign: 'right', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Total Value</th>
+                          <th style={{ textAlign: 'center', padding: '12px', color: theme.textSecondary, fontWeight: '600' }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rawMaterials.map(material => (
+                          <tr key={material.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                            <td style={{ padding: '12px', color: theme.textPrimary }}>
+                              <div style={{ fontWeight: '600' }}>{material.name}</div>
+                              {material.description && (
+                                <div style={{ fontSize: '12px', color: theme.textSecondary, marginTop: '2px' }}>
+                                  {material.description}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '8px', textAlign: 'center' }}>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={material.quantity}
+                                onChange={(e) => updateIngredientQuantity(material.id, parseFloat(e.target.value) || 0)}
+                                style={{
+                                  width: '80px',
+                                  padding: '4px',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '4px',
+                                  fontSize: '14px',
+                                  textAlign: 'center'
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: '12px', textAlign: 'center', color: theme.textSecondary }}>
+                              {material.unit}
+                            </td>
+                            <td style={{ padding: '8px', textAlign: 'right' }}>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={material.costPerUnit}
+                                onChange={(e) => updateIngredientCostPerUnit(material.id, parseFloat(e.target.value) || 0)}
+                                style={{
+                                  width: '80px',
+                                  padding: '4px',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '4px',
+                                  fontSize: '14px',
+                                  textAlign: 'right'
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: '12px', textAlign: 'right', color: '#16a34a', fontWeight: '600' }}>
+                              ₦{material.cost.toLocaleString()}
+                            </td>
+                            <td style={{ padding: '12px', textAlign: 'center' }}>
+                              <span style={{
+                                background: material.quantity < 50 ? '#fee2e2' : material.quantity < 100 ? '#fef3c7' : '#dcfce7',
+                                color: material.quantity < 50 ? '#dc2626' : material.quantity < 100 ? '#d97706' : '#16a34a',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '600'
+                              }}>
+                                {material.quantity < 50 ? 'Low' : material.quantity < 100 ? 'Medium' : 'Good'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -4982,6 +5481,541 @@ function App() {
                 <div style={{ marginBottom: '8px' }}>Thank you for your business!</div>
                 <div>This invoice was generated on {new Date().toLocaleDateString()}</div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Production Form Modal */}
+      {showProductionForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: theme.cardBg,
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ color: theme.textPrimary, margin: 0, fontSize: '24px' }}>New Production Batch</h2>
+              <button
+                onClick={() => setShowProductionForm(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: theme.textSecondary
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Basic Production Info */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Product *
+                </label>
+                <select
+                  value={newProduction.productId}
+                  onChange={(e) => setNewProduction(prev => ({ ...prev, productId: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="">Select Product</option>
+                  {products.map(product => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Batch Number
+                </label>
+                <input
+                  type="text"
+                  value={newProduction.batchNumber}
+                  onChange={(e) => setNewProduction(prev => ({ ...prev, batchNumber: e.target.value }))}
+                  placeholder="Auto-generated if empty"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Jars Produced *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newProduction.jarsProduced}
+                  onChange={(e) => setNewProduction(prev => ({ ...prev, jarsProduced: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Add Ingredients */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '18px' }}>Ingredients Used</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                    Ingredient
+                  </label>
+                  <select
+                    value={currentIngredient.ingredientId}
+                    onChange={(e) => setCurrentIngredient(prev => ({ ...prev, ingredientId: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="">Select Ingredient</option>
+                    {rawMaterials.map(material => (
+                      <option key={material.id} value={material.id}>
+                        {material.name} (Available: {material.quantity} {material.unit})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                    Quantity Used
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={currentIngredient.quantityUsed}
+                    onChange={(e) => setCurrentIngredient(prev => ({ ...prev, quantityUsed: e.target.value }))}
+                    placeholder="0"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+
+                <button
+                  onClick={addIngredientToProduction}
+                  style={{
+                    background: '#8B4513',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    height: '38px'
+                  }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Ingredients List */}
+            {newProduction.ingredientsUsed.length > 0 && (
+              <div style={{ marginBottom: '24px' }}>
+                <h4 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '16px' }}>Ingredients in this batch</h4>
+                <div style={{
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  overflow: 'hidden'
+                }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#f8f9fa' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Ingredient</th>
+                        <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Qty Used</th>
+                        <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Cost</th>
+                        <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {newProduction.ingredientsUsed.map((ingredient, index) => (
+                        <tr key={index} style={{ borderTop: '1px solid #e5e7eb' }}>
+                          <td style={{ padding: '12px', fontSize: '14px', color: theme.textPrimary }}>{ingredient.ingredientName}</td>
+                          <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: theme.textPrimary }}>
+                            {ingredient.quantityUsed} {ingredient.unit}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                            ₦{ingredient.totalCost.toLocaleString()}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'center' }}>
+                            <button
+                              onClick={() => removeIngredientFromProduction(index)}
+                              style={{
+                                background: '#dc2626',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                Production Notes
+              </label>
+              <textarea
+                value={newProduction.notes}
+                onChange={(e) => setNewProduction(prev => ({ ...prev, notes: e.target.value }))}
+                rows="3"
+                placeholder="Add any notes about this production batch..."
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+
+            {/* Production Summary */}
+            {newProduction.ingredientsUsed.length > 0 && (
+              <div style={{
+                background: '#f8f9fa',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '24px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: theme.textSecondary }}>Total Ingredient Cost:</span>
+                  <span style={{ fontWeight: '600', color: theme.textPrimary }}>₦{calculateTotalIngredientCost().toLocaleString()}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: theme.textSecondary }}>Jars to Produce:</span>
+                  <span style={{ fontWeight: '600', color: theme.textPrimary }}>{newProduction.jarsProduced || 1}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #e5e7eb', paddingTop: '8px' }}>
+                  <span style={{ fontSize: '18px', fontWeight: '600', color: theme.textPrimary }}>Cost Per Jar:</span>
+                  <span style={{ fontSize: '18px', fontWeight: '700', color: '#8B4513' }}>₦{calculateCostPerJar().toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Form Actions */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowProductionForm(false)}
+                style={{
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitProduction}
+                disabled={!newProduction.productId || newProduction.ingredientsUsed.length === 0}
+                style={{
+                  background: (!newProduction.productId || newProduction.ingredientsUsed.length === 0) ? '#d1d5db' : 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: (!newProduction.productId || newProduction.ingredientsUsed.length === 0) ? 'not-allowed' : 'pointer',
+                  opacity: (!newProduction.productId || newProduction.ingredientsUsed.length === 0) ? 0.6 : 1
+                }}
+              >
+                Start Production
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Ingredient Form Modal */}
+      {showIngredientForm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: theme.cardBg,
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ color: theme.textPrimary, margin: 0, fontSize: '24px' }}>Add New Ingredient</h2>
+              <button
+                onClick={() => setShowIngredientForm(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: theme.textSecondary
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Basic Ingredient Info */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Ingredient Name *
+                </label>
+                <input
+                  type="text"
+                  value={newIngredient.name}
+                  onChange={(e) => setNewIngredient(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Sandal Powder"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Unit of Measure *
+                </label>
+                <select
+                  value={newIngredient.unit}
+                  onChange={(e) => setNewIngredient(prev => ({ ...prev, unit: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="">Select Unit</option>
+                  <option value="grams">Grams</option>
+                  <option value="kg">Kilograms</option>
+                  <option value="ml">Milliliters</option>
+                  <option value="liters">Liters</option>
+                  <option value="pieces">Pieces</option>
+                  <option value="bottles">Bottles</option>
+                  <option value="packets">Packets</option>
+                  <option value="boxes">Boxes</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Cost Per Unit (₦) *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newIngredient.costPerUnit}
+                  onChange={(e) => setNewIngredient(prev => ({ ...prev, costPerUnit: e.target.value }))}
+                  placeholder="0.00"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Initial Quantity
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newIngredient.quantity}
+                  onChange={(e) => setNewIngredient(prev => ({ ...prev, quantity: e.target.value }))}
+                  placeholder="0"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                Supplier
+              </label>
+              <input
+                type="text"
+                value={newIngredient.supplier}
+                onChange={(e) => setNewIngredient(prev => ({ ...prev, supplier: e.target.value }))}
+                placeholder="Supplier name (optional)"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                Description
+              </label>
+              <textarea
+                value={newIngredient.description}
+                onChange={(e) => setNewIngredient(prev => ({ ...prev, description: e.target.value }))}
+                rows="3"
+                placeholder="Brief description of the ingredient (optional)"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+
+            {/* Calculated Total */}
+            {newIngredient.quantity && newIngredient.costPerUnit && (
+              <div style={{
+                background: '#f8f9fa',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '24px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: theme.textSecondary }}>Total Value:</span>
+                  <span style={{ fontSize: '18px', fontWeight: '700', color: '#8B4513' }}>
+                    ₦{(parseFloat(newIngredient.quantity) * parseFloat(newIngredient.costPerUnit)).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Form Actions */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowIngredientForm(false)}
+                style={{
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addNewIngredient}
+                disabled={!newIngredient.name || !newIngredient.unit || !newIngredient.costPerUnit}
+                style={{
+                  background: (!newIngredient.name || !newIngredient.unit || !newIngredient.costPerUnit) ? '#d1d5db' : 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: (!newIngredient.name || !newIngredient.unit || !newIngredient.costPerUnit) ? 'not-allowed' : 'pointer',
+                  opacity: (!newIngredient.name || !newIngredient.unit || !newIngredient.costPerUnit) ? 0.6 : 1
+                }}
+              >
+                Add Ingredient
+              </button>
             </div>
           </div>
         </div>
