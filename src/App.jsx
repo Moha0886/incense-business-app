@@ -158,6 +158,10 @@ function App() {
 
   // Sales Form State
   const [showSalesForm, setShowSalesForm] = useState(false);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [editingOrder, setEditingOrder] = useState(null);
   const [orderFilter, setOrderFilter] = useState('all');
   const [newSale, setNewSale] = useState({
     customerId: '',
@@ -638,6 +642,70 @@ function App() {
       return orders;
     }
     return orders.filter(order => order.status === orderFilter);
+  };
+
+  // New Order Detail Functions
+  const viewOrderDetails = (order) => {
+    setSelectedOrder(order);
+    setShowOrderDetails(true);
+  };
+
+  const editOrder = (order) => {
+    setEditingOrder({
+      ...order,
+      items: [...order.items]
+    });
+    setShowOrderDetails(false);
+  };
+
+  const updateOrder = () => {
+    if (!editingOrder || editingOrder.items.length === 0) {
+      addNotification('Order must have at least one item', 'error');
+      return;
+    }
+
+    const updatedOrder = {
+      ...editingOrder,
+      subtotal: editingOrder.items.reduce((sum, item) => sum + (item.quantity * item.price), 0),
+      total: editingOrder.items.reduce((sum, item) => sum + (item.quantity * item.price), 0) - (editingOrder.discount || 0)
+    };
+
+    setOrders(prev => prev.map(order => 
+      order.id === editingOrder.id ? updatedOrder : order
+    ));
+
+    setEditingOrder(null);
+    addNotification('Order updated successfully!', 'success');
+  };
+
+  const removeItemFromEditOrder = (index) => {
+    setEditingOrder(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateItemInEditOrder = (index, field, value) => {
+    setEditingOrder(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) => 
+        i === index 
+          ? { 
+              ...item, 
+              [field]: field === 'quantity' || field === 'price' ? parseFloat(value) || 0 : value 
+            }
+          : item
+      )
+    }));
+  };
+
+  const printInvoice = (order) => {
+    setSelectedOrder(order);
+    setShowInvoice(true);
+  };
+
+  const generateInvoicePDF = () => {
+    window.print();
   };
 
   const theme = {
@@ -2098,7 +2166,39 @@ function App() {
                                 </span>
                               </td>
                               <td style={{ padding: '12px', textAlign: 'center' }}>
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                  <button
+                                    onClick={() => viewOrderDetails(order)}
+                                    style={{
+                                      background: '#3b82f6',
+                                      color: 'white',
+                                      border: 'none',
+                                      padding: '6px 10px',
+                                      borderRadius: '4px',
+                                      fontSize: '11px',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                      minWidth: '60px'
+                                    }}
+                                  >
+                                    👁️ View
+                                  </button>
+                                  <button
+                                    onClick={() => printInvoice(order)}
+                                    style={{
+                                      background: '#8b5cf6',
+                                      color: 'white',
+                                      border: 'none',
+                                      padding: '6px 10px',
+                                      borderRadius: '4px',
+                                      fontSize: '11px',
+                                      cursor: 'pointer',
+                                      fontWeight: '600',
+                                      minWidth: '60px'
+                                    }}
+                                  >
+                                    🖨️ Print
+                                  </button>
                                   {order.status === 'pending' && (
                                     <button
                                       onClick={() => updateOrderStatus(order.id, 'completed')}
@@ -2106,11 +2206,12 @@ function App() {
                                         background: '#16a34a',
                                         color: 'white',
                                         border: 'none',
-                                        padding: '6px 12px',
+                                        padding: '6px 10px',
                                         borderRadius: '4px',
-                                        fontSize: '12px',
+                                        fontSize: '11px',
                                         cursor: 'pointer',
-                                        fontWeight: '600'
+                                        fontWeight: '600',
+                                        minWidth: '60px'
                                       }}
                                     >
                                       ✓ Complete
@@ -2123,11 +2224,12 @@ function App() {
                                         background: '#f59e0b',
                                         color: 'white',
                                         border: 'none',
-                                        padding: '6px 12px',
+                                        padding: '6px 10px',
                                         borderRadius: '4px',
-                                        fontSize: '12px',
+                                        fontSize: '11px',
                                         cursor: 'pointer',
-                                        fontWeight: '600'
+                                        fontWeight: '600',
+                                        minWidth: '60px'
                                       }}
                                     >
                                       ↻ Pending
@@ -2139,11 +2241,12 @@ function App() {
                                       background: '#dc2626',
                                       color: 'white',
                                       border: 'none',
-                                      padding: '6px 12px',
+                                      padding: '6px 10px',
                                       borderRadius: '4px',
-                                      fontSize: '12px',
+                                      fontSize: '11px',
                                       cursor: 'pointer',
-                                      fontWeight: '600'
+                                      fontWeight: '600',
+                                      minWidth: '60px'
                                     }}
                                   >
                                     🗑️ Delete
@@ -4051,6 +4154,834 @@ function App() {
               >
                 Create Order (₦{calculateSaleTotal().toLocaleString()})
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Details Modal */}
+      {showOrderDetails && selectedOrder && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: theme.cardBg,
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ color: theme.textPrimary, margin: 0, fontSize: '24px' }}>Order Details - #{selectedOrder.id}</h2>
+              <button
+                onClick={() => setShowOrderDetails(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: theme.textSecondary
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Order Info */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
+              gap: '24px', 
+              marginBottom: '32px' 
+            }}>
+              <div>
+                <h3 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '18px' }}>Order Information</h3>
+                <div style={{ background: '#f8f9fa', borderRadius: '8px', padding: '16px' }}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <strong style={{ color: theme.textSecondary }}>Customer:</strong>
+                    <div style={{ color: theme.textPrimary, fontWeight: '600' }}>
+                      {customers.find(c => c.id === selectedOrder.customerId)?.name || 'Unknown Customer'}
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <strong style={{ color: theme.textSecondary }}>Date:</strong>
+                    <div style={{ color: theme.textPrimary }}>{selectedOrder.date}</div>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <strong style={{ color: theme.textSecondary }}>Status:</strong>
+                    <div>
+                      <span style={{
+                        background: getOrderStatusColor(selectedOrder.status),
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        textTransform: 'capitalize'
+                      }}>
+                        {selectedOrder.status}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedOrder.paymentMethod && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <strong style={{ color: theme.textSecondary }}>Payment:</strong>
+                      <div style={{ color: theme.textPrimary, textTransform: 'capitalize' }}>
+                        {selectedOrder.paymentMethod.replace('_', ' ')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h3 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '18px' }}>Order Summary</h3>
+                <div style={{ background: '#f8f9fa', borderRadius: '8px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: theme.textSecondary }}>Subtotal:</span>
+                    <span style={{ fontWeight: '600', color: theme.textPrimary }}>₦{selectedOrder.subtotal.toLocaleString()}</span>
+                  </div>
+                  {selectedOrder.discount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: theme.textSecondary }}>Discount:</span>
+                      <span style={{ fontWeight: '600', color: '#dc2626' }}>-₦{selectedOrder.discount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #e5e7eb', paddingTop: '8px' }}>
+                    <span style={{ fontSize: '18px', fontWeight: '600', color: theme.textPrimary }}>Total:</span>
+                    <span style={{ fontSize: '18px', fontWeight: '700', color: '#8B4513' }}>₦{selectedOrder.total.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Items */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '18px' }}>Order Items</h3>
+              <div style={{
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                overflow: 'hidden'
+              }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#f8f9fa' }}>
+                      <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Product</th>
+                      <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Qty</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Price</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.items.map((item, index) => {
+                      const product = products.find(p => p.id === item.productId);
+                      return (
+                        <tr key={index} style={{ borderTop: index > 0 ? '1px solid #e5e7eb' : 'none' }}>
+                          <td style={{ padding: '12px', fontSize: '14px', color: theme.textPrimary }}>
+                            {product?.name || `Product ID: ${item.productId}`}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'center', fontSize: '14px', color: theme.textPrimary }}>
+                            {item.quantity}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', color: theme.textPrimary }}>
+                            ₦{item.price.toLocaleString()}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                            ₦{(item.quantity * item.price).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {selectedOrder.notes && (
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '18px' }}>Notes</h3>
+                <div style={{
+                  background: '#f8f9fa',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  color: theme.textPrimary,
+                  fontStyle: 'italic'
+                }}>
+                  {selectedOrder.notes}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => printInvoice(selectedOrder)}
+                style={{
+                  background: '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                🖨️ Print Invoice
+              </button>
+              <button
+                onClick={() => editOrder(selectedOrder)}
+                style={{
+                  background: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                ✏️ Edit Order
+              </button>
+              <button
+                onClick={() => setShowOrderDetails(false)}
+                style={{
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Order Modal */}
+      {editingOrder && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: theme.cardBg,
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '900px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ color: theme.textPrimary, margin: 0, fontSize: '24px' }}>Edit Order - #{editingOrder.id}</h2>
+              <button
+                onClick={() => setEditingOrder(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: theme.textSecondary
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Basic Order Info */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Status
+                </label>
+                <select
+                  value={editingOrder.status}
+                  onChange={(e) => setEditingOrder(prev => ({ ...prev, status: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Payment Method
+                </label>
+                <select
+                  value={editingOrder.paymentMethod || 'cash'}
+                  onChange={(e) => setEditingOrder(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="credit">Credit</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                  Discount (₦)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editingOrder.discount || 0}
+                  onChange={(e) => setEditingOrder(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Edit Items */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ color: theme.textPrimary, marginBottom: '16px', fontSize: '18px' }}>Order Items</h3>
+              <div style={{
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                overflow: 'hidden'
+              }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#f8f9fa' }}>
+                      <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Product</th>
+                      <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Qty</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Price</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Total</th>
+                      <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {editingOrder.items.map((item, index) => {
+                      const product = products.find(p => p.id === item.productId);
+                      return (
+                        <tr key={index} style={{ borderTop: index > 0 ? '1px solid #e5e7eb' : 'none' }}>
+                          <td style={{ padding: '12px', fontSize: '14px', color: theme.textPrimary }}>
+                            {product?.name || `Product ID: ${item.productId}`}
+                          </td>
+                          <td style={{ padding: '8px', textAlign: 'center' }}>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantity}
+                              onChange={(e) => updateItemInEditOrder(index, 'quantity', e.target.value)}
+                              style={{
+                                width: '60px',
+                                padding: '4px',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                textAlign: 'center'
+                              }}
+                            />
+                          </td>
+                          <td style={{ padding: '8px', textAlign: 'right' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              value={item.price}
+                              onChange={(e) => updateItemInEditOrder(index, 'price', e.target.value)}
+                              style={{
+                                width: '80px',
+                                padding: '4px',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                textAlign: 'right'
+                              }}
+                            />
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                            ₦{(item.quantity * item.price).toLocaleString()}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'center' }}>
+                            <button
+                              onClick={() => removeItemFromEditOrder(index)}
+                              style={{
+                                background: '#dc2626',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: '600', color: theme.textPrimary }}>
+                Notes
+              </label>
+              <textarea
+                value={editingOrder.notes || ''}
+                onChange={(e) => setEditingOrder(prev => ({ ...prev, notes: e.target.value }))}
+                rows="3"
+                placeholder="Add any special notes about this order..."
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+
+            {/* Order Summary */}
+            <div style={{
+              background: '#f8f9fa',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '24px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: theme.textSecondary }}>Subtotal:</span>
+                <span style={{ fontWeight: '600', color: theme.textPrimary }}>
+                  ₦{editingOrder.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString()}
+                </span>
+              </div>
+              {editingOrder.discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ color: theme.textSecondary }}>Discount:</span>
+                  <span style={{ fontWeight: '600', color: '#dc2626' }}>-₦{editingOrder.discount.toLocaleString()}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #e5e7eb', paddingTop: '8px' }}>
+                <span style={{ fontSize: '18px', fontWeight: '600', color: theme.textPrimary }}>Total:</span>
+                <span style={{ fontSize: '18px', fontWeight: '700', color: '#8B4513' }}>
+                  ₦{(editingOrder.items.reduce((sum, item) => sum + (item.quantity * item.price), 0) - (editingOrder.discount || 0)).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setEditingOrder(null)}
+                style={{
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={updateOrder}
+                disabled={editingOrder.items.length === 0}
+                style={{
+                  background: editingOrder.items.length === 0 ? '#d1d5db' : 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: editingOrder.items.length === 0 ? 'not-allowed' : 'pointer',
+                  opacity: editingOrder.items.length === 0 ? 0.6 : 1
+                }}
+              >
+                Update Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invoice Print Modal */}
+      {showInvoice && selectedOrder && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '0',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)'
+          }}>
+            {/* Print Header - Hidden in print */}
+            <div style={{ 
+              padding: '20px', 
+              borderBottom: '1px solid #e5e7eb',
+              '@media print': { display: 'none' }
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ color: theme.textPrimary, margin: 0, fontSize: '20px' }}>Invoice Preview</h2>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={generateInvoicePDF}
+                    style={{
+                      background: '#8b5cf6',
+                      color: 'white',
+                      border: 'none',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🖨️ Print
+                  </button>
+                  <button
+                    onClick={() => setShowInvoice(false)}
+                    style={{
+                      background: '#6b7280',
+                      color: 'white',
+                      border: 'none',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Invoice Content */}
+            <div style={{ 
+              padding: '40px',
+              color: '#1f2937',
+              fontSize: '14px',
+              lineHeight: '1.6'
+            }}>
+              {/* Invoice Header */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start',
+                marginBottom: '40px',
+                '@media print': { marginBottom: '30px' }
+              }}>
+                <div>
+                  <img 
+                    src={abeerLogo} 
+                    alt="Abeer Logo" 
+                    style={{ 
+                      height: '60px', 
+                      marginBottom: '16px',
+                      '@media print': { height: '50px' }
+                    }} 
+                  />
+                  <h1 style={{ 
+                    margin: 0, 
+                    fontSize: '28px', 
+                    fontWeight: '700',
+                    color: '#8B4513',
+                    '@media print': { fontSize: '24px' }
+                  }}>
+                    {settings.businessInfo.name}
+                  </h1>
+                  <div style={{ color: '#6b7280', marginTop: '8px' }}>
+                    <div>{settings.businessInfo.address}</div>
+                    <div>{settings.businessInfo.phone}</div>
+                    <div>{settings.businessInfo.email}</div>
+                    {settings.businessInfo.taxId && <div>Tax ID: {settings.businessInfo.taxId}</div>}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <h2 style={{ 
+                    margin: 0, 
+                    fontSize: '32px', 
+                    fontWeight: '700',
+                    color: '#8B4513',
+                    '@media print': { fontSize: '28px' }
+                  }}>
+                    INVOICE
+                  </h2>
+                  <div style={{ marginTop: '16px', fontSize: '16px' }}>
+                    <div><strong>Invoice #:</strong> {selectedOrder.id}</div>
+                    <div><strong>Date:</strong> {selectedOrder.date}</div>
+                    <div><strong>Status:</strong> 
+                      <span style={{
+                        background: getOrderStatusColor(selectedOrder.status),
+                        color: 'white',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        textTransform: 'capitalize',
+                        marginLeft: '8px'
+                      }}>
+                        {selectedOrder.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Info */}
+              <div style={{ marginBottom: '32px' }}>
+                <h3 style={{ 
+                  color: '#8B4513', 
+                  marginBottom: '12px', 
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  borderBottom: '2px solid #8B4513',
+                  paddingBottom: '4px'
+                }}>
+                  Bill To:
+                </h3>
+                {(() => {
+                  const customer = customers.find(c => c.id === selectedOrder.customerId);
+                  return customer ? (
+                    <div style={{ fontSize: '16px' }}>
+                      <div style={{ fontWeight: '600', marginBottom: '4px' }}>{customer.name}</div>
+                      {customer.email && <div>{customer.email}</div>}
+                      {customer.phone && <div>{customer.phone}</div>}
+                      {customer.address && <div>{customer.address}</div>}
+                    </div>
+                  ) : (
+                    <div style={{ fontStyle: 'italic', color: '#6b7280' }}>Customer information not available</div>
+                  );
+                })()}
+              </div>
+
+              {/* Items Table */}
+              <div style={{ marginBottom: '32px' }}>
+                <table style={{ 
+                  width: '100%', 
+                  borderCollapse: 'collapse',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <thead>
+                    <tr style={{ background: '#f8f9fa' }}>
+                      <th style={{ 
+                        padding: '12px', 
+                        textAlign: 'left', 
+                        borderBottom: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#374151'
+                      }}>
+                        Item Description
+                      </th>
+                      <th style={{ 
+                        padding: '12px', 
+                        textAlign: 'center', 
+                        borderBottom: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#374151'
+                      }}>
+                        Qty
+                      </th>
+                      <th style={{ 
+                        padding: '12px', 
+                        textAlign: 'right', 
+                        borderBottom: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#374151'
+                      }}>
+                        Unit Price
+                      </th>
+                      <th style={{ 
+                        padding: '12px', 
+                        textAlign: 'right', 
+                        borderBottom: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#374151'
+                      }}>
+                        Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.items.map((item, index) => {
+                      const product = products.find(p => p.id === item.productId);
+                      return (
+                        <tr key={index}>
+                          <td style={{ 
+                            padding: '12px', 
+                            borderBottom: '1px solid #f3f4f6',
+                            fontSize: '14px'
+                          }}>
+                            {product?.name || `Product ID: ${item.productId}`}
+                            {product?.category && (
+                              <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+                                {product.category} - {product.brand}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ 
+                            padding: '12px', 
+                            textAlign: 'center', 
+                            borderBottom: '1px solid #f3f4f6',
+                            fontSize: '14px'
+                          }}>
+                            {item.quantity}
+                          </td>
+                          <td style={{ 
+                            padding: '12px', 
+                            textAlign: 'right', 
+                            borderBottom: '1px solid #f3f4f6',
+                            fontSize: '14px'
+                          }}>
+                            ₦{item.price.toLocaleString()}
+                          </td>
+                          <td style={{ 
+                            padding: '12px', 
+                            textAlign: 'right', 
+                            borderBottom: '1px solid #f3f4f6',
+                            fontSize: '14px',
+                            fontWeight: '600'
+                          }}>
+                            ₦{(item.quantity * item.price).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totals */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+                <div style={{ width: '300px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+                    <span>Subtotal:</span>
+                    <span style={{ fontWeight: '600' }}>₦{selectedOrder.subtotal.toLocaleString()}</span>
+                  </div>
+                  {selectedOrder.discount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
+                      <span>Discount:</span>
+                      <span style={{ fontWeight: '600', color: '#dc2626' }}>-₦{selectedOrder.discount.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    padding: '12px 0', 
+                    borderTop: '2px solid #8B4513',
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    color: '#8B4513'
+                  }}>
+                    <span>Total:</span>
+                    <span>₦{selectedOrder.total.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Info & Notes */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '24px',
+                marginBottom: '32px'
+              }}>
+                <div>
+                  <h4 style={{ color: '#8B4513', marginBottom: '8px', fontSize: '16px' }}>Payment Information</h4>
+                  <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '6px' }}>
+                    <div><strong>Method:</strong> {selectedOrder.paymentMethod ? selectedOrder.paymentMethod.replace('_', ' ').toUpperCase() : 'Not specified'}</div>
+                  </div>
+                </div>
+                {selectedOrder.notes && (
+                  <div>
+                    <h4 style={{ color: '#8B4513', marginBottom: '8px', fontSize: '16px' }}>Notes</h4>
+                    <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: '6px', fontStyle: 'italic' }}>
+                      {selectedOrder.notes}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div style={{ 
+                textAlign: 'center', 
+                paddingTop: '24px', 
+                borderTop: '1px solid #e5e7eb',
+                color: '#6b7280',
+                fontSize: '12px'
+              }}>
+                <div style={{ marginBottom: '8px' }}>Thank you for your business!</div>
+                <div>This invoice was generated on {new Date().toLocaleDateString()}</div>
+              </div>
             </div>
           </div>
         </div>

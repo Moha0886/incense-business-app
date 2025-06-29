@@ -5,6 +5,80 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Abeer - Luxury Incense Business Management</title>
+    <style>
+      @media print {
+        * {
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        @page {
+          margin: 0.5in;
+          size: A4;
+        }
+        
+        /* Hide everything except invoice content when printing */
+        body > div:first-child > div:not(:last-child) {
+          display: none !important;
+        }
+        
+        /* Show only the invoice modal content */
+        div[style*="position: fixed"][style*="z-index: 1000"] {
+          position: static !important;
+          background: none !important;
+          display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          max-width: none !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        
+        /* Hide print buttons and modal chrome */
+        div[style*="border-bottom: 1px solid #e5e7eb"] {
+          display: none !important;
+        }
+        
+        /* Ensure invoice content is visible */
+        div[style*="padding: 40px"] {
+          padding: 20px !important;
+        }
+        
+        /* Improve table printing */
+        table {
+          page-break-inside: avoid;
+          border-collapse: collapse !important;
+        }
+        
+        tr {
+          page-break-inside: avoid;
+        }
+        
+        /* Ensure logos and images print */
+        img {
+          max-width: 100% !important;
+          height: auto !important;
+        }
+        
+        /* Improve color printing */
+        th {
+          background-color: #f8f9fa !important;
+          -webkit-print-color-adjust: exact;
+        }
+        
+        .status-badge {
+          background-color: inherit !important;
+          -webkit-print-color-adjust: exact;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
