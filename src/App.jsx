@@ -348,6 +348,263 @@ function App() {
     }
   ]);
 
+  // User Management System
+  const [currentUser, setCurrentUser] = useState({
+    id: 1,
+    username: 'admin',
+    name: 'Administrator',
+    email: 'admin@abeerincense.ng',
+    role: 'super_admin',
+    avatar: null,
+    lastLogin: new Date().toISOString(),
+    isActive: true
+  });
+
+  // Modal states for user management
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editingRole, setEditingRole] = useState(null);
+  
+  const [newUser, setNewUser] = useState({
+    username: '',
+    name: '',
+    email: '',
+    phone: '',
+    role: 'viewer',
+    password: ''
+  });
+
+  const [newRole, setNewRole] = useState({
+    name: '',
+    description: '',
+    permissions: [],
+    color: '#6b7280',
+    level: 30
+  });
+
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      username: 'admin',
+      name: 'Administrator',
+      email: 'admin@abeerincense.ng',
+      role: 'super_admin',
+      permissions: ['all'],
+      avatar: null,
+      phone: '+234-xxx-xxx-xxxx',
+      dateCreated: '2025-01-01',
+      lastLogin: new Date().toISOString(),
+      isActive: true,
+      createdBy: 'system'
+    },
+    {
+      id: 2,
+      username: 'manager',
+      name: 'Business Manager',
+      email: 'manager@abeerincense.ng',
+      role: 'manager',
+      permissions: ['view_dashboard', 'manage_products', 'manage_customers', 'view_sales', 'manage_inventory', 'view_reports'],
+      avatar: null,
+      phone: '+234-xxx-xxx-xxxy',
+      dateCreated: '2025-01-15',
+      lastLogin: '2025-06-28T10:30:00Z',
+      isActive: true,
+      createdBy: 'admin'
+    },
+    {
+      id: 3,
+      username: 'sales_rep',
+      name: 'Sales Representative',
+      email: 'sales@abeerincense.ng',
+      role: 'sales',
+      permissions: ['view_dashboard', 'view_products', 'manage_customers', 'manage_sales', 'view_inventory'],
+      avatar: null,
+      phone: '+234-xxx-xxx-xxxz',
+      dateCreated: '2025-02-01',
+      lastLogin: '2025-06-29T08:15:00Z',
+      isActive: true,
+      createdBy: 'manager'
+    },
+    {
+      id: 4,
+      username: 'production_lead',
+      name: 'Production Lead',
+      email: 'production@abeerincense.ng',
+      role: 'production',
+      permissions: ['view_dashboard', 'view_products', 'manage_production', 'manage_inventory', 'view_reports'],
+      avatar: null,
+      phone: '+234-xxx-xxx-xxxa',
+      dateCreated: '2025-02-10',
+      lastLogin: '2025-06-29T07:45:00Z',
+      isActive: true,
+      createdBy: 'admin'
+    }
+  ]);
+
+  const [roles, setRoles] = useState([
+    {
+      id: 'super_admin',
+      name: 'Super Administrator',
+      description: 'Full system access and control',
+      permissions: ['all'],
+      color: '#DC2626',
+      level: 100
+    },
+    {
+      id: 'admin',
+      name: 'Administrator',
+      description: 'Administrative access to most features',
+      permissions: [
+        'view_dashboard', 'manage_products', 'manage_customers', 'manage_sales', 
+        'manage_inventory', 'manage_production', 'view_reports', 'manage_settings',
+        'manage_users_limited'
+      ],
+      color: '#EA580C',
+      level: 90
+    },
+    {
+      id: 'manager',
+      name: 'Manager',
+      description: 'Business management and oversight',
+      permissions: [
+        'view_dashboard', 'manage_products', 'manage_customers', 'view_sales', 
+        'manage_inventory', 'view_production', 'view_reports'
+      ],
+      color: '#D97706',
+      level: 70
+    },
+    {
+      id: 'sales',
+      name: 'Sales Representative',
+      description: 'Customer and sales management',
+      permissions: [
+        'view_dashboard', 'view_products', 'manage_customers', 'manage_sales', 'view_inventory'
+      ],
+      color: '#059669',
+      level: 50
+    },
+    {
+      id: 'production',
+      name: 'Production Lead',
+      description: 'Production and inventory management',
+      permissions: [
+        'view_dashboard', 'view_products', 'manage_production', 'manage_inventory', 'view_reports'
+      ],
+      color: '#7C3AED',
+      level: 50
+    },
+    {
+      id: 'viewer',
+      name: 'Viewer',
+      description: 'Read-only access to basic information',
+      permissions: ['view_dashboard', 'view_products', 'view_customers', 'view_sales'],
+      color: '#6B7280',
+      level: 20
+    }
+  ]);
+
+  const [permissions] = useState([
+    { id: 'all', name: 'All Permissions', description: 'Complete system access', category: 'System' },
+    { id: 'view_dashboard', name: 'View Dashboard', description: 'Access to main dashboard', category: 'General' },
+    { id: 'manage_products', name: 'Manage Products', description: 'Create, edit, delete products', category: 'Products' },
+    { id: 'view_products', name: 'View Products', description: 'View product information', category: 'Products' },
+    { id: 'manage_customers', name: 'Manage Customers', description: 'Create, edit, delete customers', category: 'Customers' },
+    { id: 'view_customers', name: 'View Customers', description: 'View customer information', category: 'Customers' },
+    { id: 'manage_sales', name: 'Manage Sales', description: 'Create, edit, delete sales', category: 'Sales' },
+    { id: 'view_sales', name: 'View Sales', description: 'View sales information', category: 'Sales' },
+    { id: 'manage_inventory', name: 'Manage Inventory', description: 'Update inventory levels', category: 'Inventory' },
+    { id: 'view_inventory', name: 'View Inventory', description: 'View inventory information', category: 'Inventory' },
+    { id: 'manage_production', name: 'Manage Production', description: 'Create and manage production batches', category: 'Production' },
+    { id: 'view_production', name: 'View Production', description: 'View production information', category: 'Production' },
+    { id: 'view_reports', name: 'View Reports', description: 'Access to reports and analytics', category: 'Reports' },
+    { id: 'manage_settings', name: 'Manage Settings', description: 'Configure system settings', category: 'Settings' },
+    { id: 'manage_users', name: 'Manage Users', description: 'Create, edit, delete users', category: 'Users' },
+    { id: 'manage_users_limited', name: 'Manage Users (Limited)', description: 'Limited user management', category: 'Users' },
+    { id: 'manage_roles', name: 'Manage Roles', description: 'Create and modify user roles', category: 'Users' }
+  ]);
+
+  // Permission checking function
+  const hasPermission = (permission) => {
+    if (!currentUser) return false;
+    const userRole = roles.find(role => role.id === currentUser.role);
+    if (!userRole) return false;
+    
+    // Super admin has all permissions
+    if (userRole.permissions.includes('all')) return true;
+    
+    // Check specific permission
+    return userRole.permissions.includes(permission);
+  };
+
+  // User management functions
+  const addUser = (userData) => {
+    const newUser = {
+      id: users.length + 1,
+      ...userData,
+      dateCreated: new Date().toISOString().split('T')[0],
+      lastLogin: null,
+      isActive: true,
+      createdBy: currentUser.username
+    };
+    setUsers([...users, newUser]);
+    addNotification(`User ${userData.name} created successfully`, 'success');
+  };
+
+  const updateUser = (userId, userData) => {
+    setUsers(users.map(user => 
+      user.id === userId ? { ...user, ...userData } : user
+    ));
+    addNotification('User updated successfully', 'success');
+  };
+
+  const deleteUser = (userId) => {
+    if (userId === currentUser.id) {
+      addNotification('Cannot delete your own account', 'error');
+      return;
+    }
+    setUsers(users.filter(user => user.id !== userId));
+    addNotification('User deleted successfully', 'success');
+  };
+
+  const toggleUserStatus = (userId) => {
+    if (userId === currentUser.id) {
+      addNotification('Cannot deactivate your own account', 'error');
+      return;
+    }
+    setUsers(users.map(user => 
+      user.id === userId ? { ...user, isActive: !user.isActive } : user
+    ));
+    addNotification('User status updated', 'success');
+  };
+
+  const addRole = (roleData) => {
+    const newRole = {
+      id: roleData.name.toLowerCase().replace(/\s+/g, '_'),
+      ...roleData
+    };
+    setRoles([...roles, newRole]);
+    addNotification(`Role ${roleData.name} created successfully`, 'success');
+  };
+
+  const updateRole = (roleId, roleData) => {
+    setRoles(roles.map(role => 
+      role.id === roleId ? { ...role, ...roleData } : role
+    ));
+    addNotification('Role updated successfully', 'success');
+  };
+
+  const deleteRole = (roleId) => {
+    // Check if role is in use
+    const usersWithRole = users.filter(user => user.role === roleId);
+    if (usersWithRole.length > 0) {
+      addNotification(`Cannot delete role. ${usersWithRole.length} users are assigned this role.`, 'error');
+      return;
+    }
+    setRoles(roles.filter(role => role.id !== roleId));
+    addNotification('Role deleted successfully', 'success');
+  };
+
   const addNotification = (message, type = 'info') => {
     const id = Date.now();
     setNotifications(prev => [...prev, { id, message, type }]);
@@ -967,8 +1224,9 @@ function App() {
     { id: 'customers', label: 'Customers', icon: '👥', color: '#8B4513' },
     { id: 'sales', label: 'Sales', icon: '🛒', color: '#8B4513' },
     { id: 'inventory', label: 'Inventory', icon: '📦', color: '#D2691E' },
-    { id: 'pricing', label: 'Pricing', icon: '�', color: '#CD853F' },
+    { id: 'pricing', label: 'Pricing', icon: '💰', color: '#CD853F' },
     { id: 'categories', label: 'Categories', icon: '🏷️', color: '#DEB887' },
+    { id: 'users', label: 'Users & Roles', icon: '👤', color: '#7C3AED' },
     { id: 'reports', label: 'Reports', icon: '📊', color: '#DEB887' },
     { id: 'config', label: 'Settings', icon: '⚙️', color: '#6B7280' }
   ];
@@ -3641,7 +3899,403 @@ function App() {
             </div>
           )}
 
-          {activeTab !== 'dashboard' && activeTab !== 'products' && activeTab !== 'customers' && activeTab !== 'pricing' && activeTab !== 'categories' && activeTab !== 'sales' && activeTab !== 'inventory' && activeTab !== 'config' && (
+          {activeTab === 'users' && (
+            <div>
+              {!hasPermission('manage_users') && !hasPermission('manage_users_limited') ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '60px 20px',
+                  background: '#fef2f2',
+                  borderRadius: '16px',
+                  border: '1px solid #fecaca'
+                }}>
+                  <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔒</div>
+                  <h3 style={{ color: '#dc2626', fontSize: '24px', marginBottom: '12px' }}>Access Denied</h3>
+                  <p style={{ color: '#7f1d1d', fontSize: '16px' }}>
+                    You don't have permission to access user management.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h2 style={{ color: theme.textPrimary, fontSize: '28px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      👤 User Management
+                    </h2>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        onClick={() => setShowUserModal(true)}
+                        style={{
+                          background: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '12px 20px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        ➕ Add User
+                      </button>
+                      <button
+                        onClick={() => setShowRoleModal(true)}
+                        style={{
+                          background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '12px 20px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        🏷️ Manage Roles
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Stats Cards */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: '16px',
+                    marginBottom: '24px'
+                  }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)',
+                      color: 'white',
+                      padding: '20px',
+                      borderRadius: '12px'
+                    }}>
+                      <div style={{ fontSize: '24px', fontWeight: '700' }}>{users.length}</div>
+                      <div style={{ opacity: 0.9 }}>Total Users</div>
+                    </div>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                      color: 'white',
+                      padding: '20px',
+                      borderRadius: '12px'
+                    }}>
+                      <div style={{ fontSize: '24px', fontWeight: '700' }}>{users.filter(u => u.isActive).length}</div>
+                      <div style={{ opacity: 0.9 }}>Active Users</div>
+                    </div>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+                      color: 'white',
+                      padding: '20px',
+                      borderRadius: '12px'
+                    }}>
+                      <div style={{ fontSize: '24px', fontWeight: '700' }}>{roles.length}</div>
+                      <div style={{ opacity: 0.9 }}>Total Roles</div>
+                    </div>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+                      color: 'white',
+                      padding: '20px',
+                      borderRadius: '12px'
+                    }}>
+                      <div style={{ fontSize: '24px', fontWeight: '700' }}>{permissions.length}</div>
+                      <div style={{ opacity: 0.9 }}>Permissions</div>
+                    </div>
+                  </div>
+
+                  {/* Users Table */}
+                  <div style={{
+                    background: theme.cardBg,
+                    borderRadius: '16px',
+                    padding: '24px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid rgba(139, 69, 19, 0.1)',
+                    marginBottom: '24px'
+                  }}>
+                    <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px' }}>
+                      Users List
+                    </h3>
+                    
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                            <th style={{ textAlign: 'left', padding: '12px', color: theme.textPrimary, fontWeight: '600' }}>User</th>
+                            <th style={{ textAlign: 'left', padding: '12px', color: theme.textPrimary, fontWeight: '600' }}>Role</th>
+                            <th style={{ textAlign: 'left', padding: '12px', color: theme.textPrimary, fontWeight: '600' }}>Status</th>
+                            <th style={{ textAlign: 'left', padding: '12px', color: theme.textPrimary, fontWeight: '600' }}>Last Login</th>
+                            <th style={{ textAlign: 'center', padding: '12px', color: theme.textPrimary, fontWeight: '600' }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {users.map(user => {
+                            const userRole = roles.find(role => role.id === user.role);
+                            return (
+                              <tr key={user.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                <td style={{ padding: '12px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{
+                                      width: '40px',
+                                      height: '40px',
+                                      borderRadius: '50%',
+                                      background: `linear-gradient(135deg, ${userRole?.color || '#6b7280'} 0%, ${userRole?.color || '#6b7280'}80 100%)`,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      color: 'white',
+                                      fontWeight: '600',
+                                      fontSize: '14px'
+                                    }}>
+                                      {user.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <div style={{ fontWeight: '600', color: theme.textPrimary }}>{user.name}</div>
+                                      <div style={{ fontSize: '12px', color: theme.textSecondary }}>{user.email}</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px' }}>
+                                  <div style={{
+                                    display: 'inline-block',
+                                    padding: '4px 12px',
+                                    borderRadius: '12px',
+                                    background: `${userRole?.color || '#6b7280'}20`,
+                                    color: userRole?.color || '#6b7280',
+                                    fontSize: '12px',
+                                    fontWeight: '600'
+                                  }}>
+                                    {userRole?.name || user.role}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px' }}>
+                                  <div style={{
+                                    display: 'inline-block',
+                                    padding: '4px 12px',
+                                    borderRadius: '12px',
+                                    background: user.isActive ? '#dcfce720' : '#fef2f220',
+                                    color: user.isActive ? '#16a34a' : '#dc2626',
+                                    fontSize: '12px',
+                                    fontWeight: '600'
+                                  }}>
+                                    {user.isActive ? 'Active' : 'Inactive'}
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px', color: theme.textSecondary, fontSize: '14px' }}>
+                                  {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                                </td>
+                                <td style={{ padding: '12px', textAlign: 'center' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                                    <button
+                                      onClick={() => {
+                                        setEditingUser(user);
+                                        setShowUserModal(true);
+                                      }}
+                                      style={{
+                                        background: '#3b82f6',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => toggleUserStatus(user.id)}
+                                      disabled={user.id === currentUser.id}
+                                      style={{
+                                        background: user.isActive ? '#ef4444' : '#10b981',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        cursor: user.id === currentUser.id ? 'not-allowed' : 'pointer',
+                                        opacity: user.id === currentUser.id ? 0.5 : 1
+                                      }}
+                                    >
+                                      {user.isActive ? 'Disable' : 'Enable'}
+                                    </button>
+                                    <button
+                                      onClick={() => deleteUser(user.id)}
+                                      disabled={user.id === currentUser.id}
+                                      style={{
+                                        background: '#dc2626',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        cursor: user.id === currentUser.id ? 'not-allowed' : 'pointer',
+                                        opacity: user.id === currentUser.id ? 0.5 : 1
+                                      }}
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Roles Section */}
+                  <div style={{
+                    background: theme.cardBg,
+                    borderRadius: '16px',
+                    padding: '24px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid rgba(139, 69, 19, 0.1)'
+                  }}>
+                    <h3 style={{ color: theme.textPrimary, marginBottom: '20px', fontSize: '20px' }}>
+                      Roles & Permissions
+                    </h3>
+                    
+                    <div style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', 
+                      gap: '16px' 
+                    }}>
+                      {roles.map(role => (
+                        <div key={role.id} style={{
+                          border: `2px solid ${role.color}20`,
+                          borderRadius: '12px',
+                          padding: '20px',
+                          background: `${role.color}05`
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                            <div>
+                              <h4 style={{ 
+                                color: role.color, 
+                                margin: '0 0 4px 0', 
+                                fontSize: '16px', 
+                                fontWeight: '700' 
+                              }}>
+                                {role.name}
+                              </h4>
+                              <p style={{ 
+                                color: theme.textSecondary, 
+                                margin: 0, 
+                                fontSize: '12px' 
+                              }}>
+                                {role.description}
+                              </p>
+                            </div>
+                            <div style={{
+                              background: role.color,
+                              color: 'white',
+                              padding: '4px 8px',
+                              borderRadius: '8px',
+                              fontSize: '10px',
+                              fontWeight: '600'
+                            }}>
+                              Level {role.level}
+                            </div>
+                          </div>
+                          
+                          <div style={{ marginBottom: '16px' }}>
+                            <div style={{ fontSize: '12px', color: theme.textSecondary, marginBottom: '8px' }}>
+                              Permissions ({role.permissions.length}):
+                            </div>
+                            <div style={{ 
+                              display: 'flex', 
+                              flexWrap: 'wrap', 
+                              gap: '4px',
+                              maxHeight: '80px',
+                              overflowY: 'auto'
+                            }}>
+                              {role.permissions.includes('all') ? (
+                                <span style={{
+                                  background: '#dc262620',
+                                  color: '#dc2626',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  fontSize: '10px',
+                                  fontWeight: '600'
+                                }}>
+                                  ALL PERMISSIONS
+                                </span>
+                              ) : role.permissions.map(permId => {
+                                const perm = permissions.find(p => p.id === permId);
+                                return perm ? (
+                                  <span key={permId} style={{
+                                    background: '#3b82f620',
+                                    color: '#3b82f6',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontSize: '10px'
+                                  }}>
+                                    {perm.name}
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
+                          </div>
+                          
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            paddingTop: '12px',
+                            borderTop: '1px solid #e5e7eb'
+                          }}>
+                            <span style={{ fontSize: '12px', color: theme.textSecondary }}>
+                              {users.filter(user => user.role === role.id).length} users
+                            </span>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button
+                                onClick={() => {
+                                  setEditingRole(role);
+                                  setShowRoleModal(true);
+                                }}
+                                style={{
+                                  background: '#3b82f6',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '10px',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Edit
+                              </button>
+                              {!['super_admin', 'admin'].includes(role.id) && (
+                                <button
+                                  onClick={() => deleteRole(role.id)}
+                                  style={{
+                                    background: '#dc2626',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab !== 'dashboard' && activeTab !== 'products' && activeTab !== 'customers' && activeTab !== 'pricing' && activeTab !== 'categories' && activeTab !== 'sales' && activeTab !== 'inventory' && activeTab !== 'config' && activeTab !== 'users' && (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <div style={{
                 fontSize: '64px',
@@ -6024,6 +6678,588 @@ function App() {
                 }}
               >
                 Add Ingredient
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Management Modal */}
+      {showUserModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '24px', color: theme.textPrimary }}>
+              {editingUser ? 'Edit User' : 'Add New User'}
+            </h3>
+
+            <div style={{ display: 'grid', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={editingUser ? editingUser.name : newUser.name}
+                  onChange={(e) => {
+                    if (editingUser) {
+                      setEditingUser(prev => ({ ...prev, name: e.target.value }));
+                    } else {
+                      setNewUser(prev => ({ ...prev, name: e.target.value }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  value={editingUser ? editingUser.username : newUser.username}
+                  onChange={(e) => {
+                    if (editingUser) {
+                      setEditingUser(prev => ({ ...prev, username: e.target.value }));
+                    } else {
+                      setNewUser(prev => ({ ...prev, username: e.target.value }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder="Enter username"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={editingUser ? editingUser.email : newUser.email}
+                  onChange={(e) => {
+                    if (editingUser) {
+                      setEditingUser(prev => ({ ...prev, email: e.target.value }));
+                    } else {
+                      setNewUser(prev => ({ ...prev, email: e.target.value }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={editingUser ? editingUser.phone : newUser.phone}
+                  onChange={(e) => {
+                    if (editingUser) {
+                      setEditingUser(prev => ({ ...prev, phone: e.target.value }));
+                    } else {
+                      setNewUser(prev => ({ ...prev, phone: e.target.value }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Role *
+                </label>
+                <select
+                  value={editingUser ? editingUser.role : newUser.role}
+                  onChange={(e) => {
+                    const selectedRole = roles.find(role => role.id === e.target.value);
+                    if (editingUser) {
+                      setEditingUser(prev => ({ 
+                        ...prev, 
+                        role: e.target.value,
+                        permissions: selectedRole ? selectedRole.permissions : []
+                      }));
+                    } else {
+                      setNewUser(prev => ({ 
+                        ...prev, 
+                        role: e.target.value,
+                        permissions: selectedRole ? selectedRole.permissions : []
+                      }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  {roles.map(role => (
+                    <option key={role.id} value={role.id}>
+                      {role.name} (Level {role.level})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {!editingUser && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                    Password *
+                  </label>
+                  <input
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                    placeholder="Enter password"
+                  />
+                </div>
+              )}
+
+              {/* Permissions Preview */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Permissions
+                </label>
+                <div style={{
+                  background: '#f8f9fa',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  maxHeight: '120px',
+                  overflowY: 'auto'
+                }}>
+                  {(() => {
+                    const currentRole = roles.find(role => role.id === (editingUser ? editingUser.role : newUser.role));
+                    if (!currentRole) return <span style={{ color: theme.textSecondary }}>Select a role to see permissions</span>;
+                    
+                    if (currentRole.permissions.includes('all')) {
+                      return <span style={{ color: '#dc2626', fontWeight: '600' }}>ALL PERMISSIONS</span>;
+                    }
+                    
+                    return (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {currentRole.permissions.map(permId => {
+                          const perm = permissions.find(p => p.id === permId);
+                          return perm ? (
+                            <span key={permId} style={{
+                              background: '#3b82f620',
+                              color: '#3b82f6',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}>
+                              {perm.name}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+              <button
+                onClick={() => {
+                  setShowUserModal(false);
+                  setEditingUser(null);
+                  setNewUser({
+                    username: '',
+                    name: '',
+                    email: '',
+                    phone: '',
+                    role: 'viewer',
+                    password: ''
+                  });
+                }}
+                style={{
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (editingUser) {
+                    updateUser(editingUser.id, editingUser);
+                  } else {
+                    if (newUser.name && newUser.username && newUser.email && newUser.password) {
+                      const selectedRole = roles.find(role => role.id === newUser.role);
+                      addUser({
+                        ...newUser,
+                        permissions: selectedRole ? selectedRole.permissions : []
+                      });
+                      setNewUser({
+                        username: '',
+                        name: '',
+                        email: '',
+                        phone: '',
+                        role: 'viewer',
+                        password: ''
+                      });
+                    } else {
+                      addNotification('Please fill in all required fields', 'error');
+                      return;
+                    }
+                  }
+                  setShowUserModal(false);
+                  setEditingUser(null);
+                }}
+                disabled={editingUser ? false : (!newUser.name || !newUser.username || !newUser.email || !newUser.password)}
+                style={{
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  opacity: (editingUser || (newUser.name && newUser.username && newUser.email && newUser.password)) ? 1 : 0.6
+                }}
+              >
+                {editingUser ? 'Update User' : 'Create User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Role Management Modal */}
+      {showRoleModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '24px', color: theme.textPrimary }}>
+              {editingRole ? 'Edit Role' : 'Create New Role'}
+            </h3>
+
+            <div style={{ display: 'grid', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Role Name *
+                </label>
+                <input
+                  type="text"
+                  value={editingRole ? editingRole.name : newRole.name}
+                  onChange={(e) => {
+                    if (editingRole) {
+                      setEditingRole(prev => ({ ...prev, name: e.target.value }));
+                    } else {
+                      setNewRole(prev => ({ ...prev, name: e.target.value }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder="Enter role name"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Description
+                </label>
+                <textarea
+                  value={editingRole ? editingRole.description : newRole.description}
+                  onChange={(e) => {
+                    if (editingRole) {
+                      setEditingRole(prev => ({ ...prev, description: e.target.value }));
+                    } else {
+                      setNewRole(prev => ({ ...prev, description: e.target.value }));
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    resize: 'vertical',
+                    minHeight: '80px',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder="Enter role description"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                    Color
+                  </label>
+                  <input
+                    type="color"
+                    value={editingRole ? editingRole.color : newRole.color}
+                    onChange={(e) => {
+                      if (editingRole) {
+                        setEditingRole(prev => ({ ...prev, color: e.target.value }));
+                      } else {
+                        setNewRole(prev => ({ ...prev, color: e.target.value }));
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      height: '48px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                    Access Level (1-100)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={editingRole ? editingRole.level : newRole.level}
+                    onChange={(e) => {
+                      if (editingRole) {
+                        setEditingRole(prev => ({ ...prev, level: parseInt(e.target.value) || 1 }));
+                      } else {
+                        setNewRole(prev => ({ ...prev, level: parseInt(e.target.value) || 1 }));
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: theme.textPrimary }}>
+                  Permissions *
+                </label>
+                <div style={{
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  padding: '12px'
+                }}>
+                  {Object.entries(
+                    permissions.reduce((groups, perm) => {
+                      if (!groups[perm.category]) groups[perm.category] = [];
+                      groups[perm.category].push(perm);
+                      return groups;
+                    }, {})
+                  ).map(([category, perms]) => (
+                    <div key={category} style={{ marginBottom: '16px' }}>
+                      <div style={{ 
+                        fontWeight: '600', 
+                        color: theme.textPrimary, 
+                        marginBottom: '8px',
+                        fontSize: '14px'
+                      }}>
+                        {category}
+                      </div>
+                      {perms.map(perm => (
+                        <label key={perm.id} style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '8px',
+                          marginBottom: '4px',
+                          fontSize: '13px',
+                          cursor: 'pointer'
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={(editingRole ? editingRole.permissions : newRole.permissions).includes(perm.id)}
+                            onChange={(e) => {
+                              const currentPermissions = editingRole ? editingRole.permissions : newRole.permissions;
+                              const newPermissions = e.target.checked
+                                ? [...currentPermissions, perm.id]
+                                : currentPermissions.filter(p => p !== perm.id);
+                              
+                              if (editingRole) {
+                                setEditingRole(prev => ({ ...prev, permissions: newPermissions }));
+                              } else {
+                                setNewRole(prev => ({ ...prev, permissions: newPermissions }));
+                              }
+                            }}
+                            style={{ marginRight: '4px' }}
+                          />
+                          <div>
+                            <div style={{ fontWeight: '500', color: theme.textPrimary }}>{perm.name}</div>
+                            <div style={{ fontSize: '11px', color: theme.textSecondary }}>{perm.description}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+              <button
+                onClick={() => {
+                  setShowRoleModal(false);
+                  setEditingRole(null);
+                  setNewRole({
+                    name: '',
+                    description: '',
+                    permissions: [],
+                    color: '#6b7280',
+                    level: 30
+                  });
+                }}
+                style={{
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (editingRole) {
+                    updateRole(editingRole.id, editingRole);
+                  } else {
+                    if (newRole.name && newRole.permissions.length > 0) {
+                      addRole(newRole);
+                      setNewRole({
+                        name: '',
+                        description: '',
+                        permissions: [],
+                        color: '#6b7280',
+                        level: 30
+                      });
+                    } else {
+                      addNotification('Please fill in role name and select at least one permission', 'error');
+                      return;
+                    }
+                  }
+                  setShowRoleModal(false);
+                  setEditingRole(null);
+                }}
+                disabled={editingRole ? false : (!newRole.name || newRole.permissions.length === 0)}
+                style={{
+                  background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  opacity: (editingRole || (newRole.name && newRole.permissions.length > 0)) ? 1 : 0.6
+                }}
+              >
+                {editingRole ? 'Update Role' : 'Create Role'}
               </button>
             </div>
           </div>
