@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import abeerLogo from './assets/logos/abeer-logo.png';
+import areejLogo from './assets/logos/areej-logo.png';
 
 function App() {
   // Mobile state
@@ -81,10 +82,10 @@ function App() {
 
   // Product Categories
   const [categories, setCategories] = useState([
-    { id: 1, name: 'Khumra', description: 'Premium liquid incense', icon: '🧴' },
-    { id: 2, name: 'Abeer (Luxury)', description: 'High-end incense sticks', icon: '🌟' },
-    { id: 3, name: 'Areej (Standard)', description: 'Standard quality incense', icon: '🎋' },
-    { id: 4, name: 'Specialty Blends', description: 'Custom and seasonal products', icon: '✨' }
+    { id: 1, name: 'Khumra', description: 'Premium liquid incense', logo: abeerLogo, brand: 'Abeer' },
+    { id: 2, name: 'Abeer (Luxury)', description: 'High-end incense sticks', logo: abeerLogo, brand: 'Abeer' },
+    { id: 3, name: 'Areej (Standard)', description: 'Standard quality incense', logo: areejLogo, brand: 'Areej' },
+    { id: 4, name: 'Specialty Blends', description: 'Custom and seasonal products', logo: abeerLogo, brand: 'Abeer' }
   ]);
 
   // Customers
@@ -2208,7 +2209,15 @@ function App() {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ fontSize: '32px' }}>{category.icon}</span>
+                          <img 
+                            src={category.logo} 
+                            alt={`${category.brand} Logo`} 
+                            style={{ 
+                              width: '32px', 
+                              height: '32px',
+                              borderRadius: '4px'
+                            }} 
+                          />
                           <div>
                             <h3 style={{ color: theme.textPrimary, margin: '0 0 4px 0', fontSize: '18px' }}>{category.name}</h3>
                             <p style={{ color: theme.textSecondary, margin: 0, fontSize: '14px' }}>{category.description}</p>
